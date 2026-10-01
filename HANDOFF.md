@@ -1,5 +1,51 @@
 # Desktop Handoff
 
+## Island City Layout - September 30, 2026
+
+User requested a large city island, a bridge to a hotel island, and street shapes based on SourceAssets/Design/IslandCityReference.png, using Broken Vector Low Poly Road Pack (asset 67288). The user imported the pack into Assets/BrokenVector/LowPolyRoadPack.
+
+Open the saved layout with **Valet Getaway > Open Island City**, or open Assets/Scenes/ValetIslandCity.unity. All scene geometry is saved and editable in the Hierarchy. This is a visual layout scene; player/guest/buyer/bus gameplay remains in ValetTestCity and has NOT been migrated into this larger map.
+
+Added:
+- Two finite islands and surrounding water, with sand shores.
+- 21 named road routes using adapted meshes from the requested road pack. Street centerlines were traced from the supplied screenshot; the pack's actual demo scene has a different layout. This is a reference-based reconstruction, not a pixel-exact copy.
+- The pack's truss bridge with a continuous collidable carriageway between islands.
+- 90 district-coordinated city buildings/houses, including pitched roofs along curved streets.
+- Hotel building, entrance canopy, valet bays, arrival loop, fountain, landscaping, and parking on the opposite island. This side extends beyond what is visible in the cropped reference.
+- URP materials in Assets/ValetGetaway/IslandCity/Materials. Original pack materials/assets remain intact.
+- Editor builder: Assets/ValetGetaway/Scripts/Editor/IslandCityBuilder.cs. Open Island City is for viewing; Build Reference Island City regenerates the layout and geometry. Back up manual changes before regenerating.
+
+Verified using Unity 6000.6.3f1 in a separate build workspace:
+- Fresh compilation and saved-scene reopening succeeded.
+- 1,073 persistent mesh renderers; zero missing materials.
+- Raycasts confirmed a continuous bridge carriageway collider.
+- Overhead and hotel previews were rendered and inspected. No manual driving test or full intersection collision audit has been performed. Junction lane markings remain a polish item.
+- Copied scene hash matches the verified scene; the original ValetTestCity file hash is unchanged.
+
+Original scene backup: Logs/SceneBackups/ValetTestCity_BeforeIslandLayout.unity. Temporary survey script was removed, and its request was consumed. No auto-build requests remain.
+
+Next: review the layout with the user, polish intersections/terrain/building detail, then migrate the hotel gameplay into this scene with relative coordinates and city-wide buyer/bus navigation. Do not simply move the old gameplay root: HotelGuestCar and validation currently use hard-coded coordinates.
+
+## Desktop Update - September 30, 2026
+
+Implemented the design proposal's vehicle damage/value system:
+- Impacts above 3 m/s into a surface reduce condition; gentle bumps and upward-facing road contacts do not.
+- Condition loss is 4.5 percentage points per m/s above that threshold, with a 0.35-second contact cooldown.
+- Sale value scales from 100% at pristine condition to a 20% salvage floor. These are initial tuning choices, adjustable on VehicleInteraction in the Inspector.
+- HUD shows condition, current sale offer, and driving speed. Crash notifications show value lost; sale messages show final condition.
+- Guest arrival remains protected. Damage persists after exiting/re-entering a claimed car. New guest handovers and prototype resets restore condition.
+- Existing buyer discovery, stopped-car, nearby-car, and on-foot conversation gates are retained.
+
+Verified in Unity 6000.6.3f1 on this desktop:
+- Fresh script compilation succeeded; no C# compile errors found in the run log.
+- `VALET DAMAGE VALIDATION PASSED`: gentle/invalid impacts, depreciation, contact cooldown, salvage floor, replacement reset.
+- `VALET HOTEL VALIDATION PASSED`: arrival, keys, driving, discovery, sale gates, damaged-car payout, duplicate prevention, bus return, replacement arrival and restored condition.
+- Tests are available under Valet Getaway > Validate Vehicle Damage and Validate Hotel Gameplay.
+- Evidence was in Logs/Editor.log; logs are ignored and may rotate. A compact validation record is saved in this chat's outputs.
+
+Pending: manually drive into walls at different speeds, inspect HUD at desktop and narrow WebGL resolutions, and tune damage economics. The automated damage checks exercise impact/value logic; physical contact feel and HUD appearance are not visually verified. Kenney visual cleanup remains pending; no scene rebuild or scene save was performed for this change. Debt/timer/win/lose states, traffic and police are still future design work.
+
+The original scene file was preserved. A temporary desktop test runner was removed after validation and its request was consumed. The design PDF is now in SourceAssets/Design. This Downloads folder appears to be an extracted project without a .git directory: these changes are local, not pushed to GitHub. Unity remains open with ValetTestCity after the tests.
 ## Start Here
 
 This repository contains the project files and this handoff, not a copy of the
@@ -76,8 +122,7 @@ Scene backups: `ValetTestCity_BeforeHotel.unity` and `ValetTestCity_BeforeKenney
 under `Assets/Scenes`. Do not replace the main scene with a backup without checking
 what would be lost. Money currently lasts only for the current play session.
 
-The original game-design PDF was outside the project and is not in this repository.
-Ask the user to attach it again if full design details are needed.
+The game-design PDF is now included at SourceAssets/Design/Valet Getaway - Game Design Proposal.pdf.
 
 ## Switching Computers
 
@@ -86,3 +131,4 @@ on the other computer before editing. Do not edit the same scene simultaneously
 on both machines. GitHub does not automatically upload uncommitted local changes.
 
 Documentation: https://learn.chatgpt.com/docs/agent-configuration/agents-md
+

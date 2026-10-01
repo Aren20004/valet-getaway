@@ -16,6 +16,7 @@ namespace ValetGetaway.Editor
         private static HotelGuestCar firstGuest;
         private static Vector3 carStart;
         private static bool moved;
+        private static int expectedPayout;
         private static bool previousRunInBackground;
 
         static HotelGameplayValidation()
@@ -109,9 +110,12 @@ namespace ValetGetaway.Editor
                     Assert(!session.Delivery.TrySell(car), "Distant car accepted for sale");
                     body.position = new Vector3(0, 0.12f, 25); car.transform.position = body.position;
                     Physics.SyncTransforms();
+                    VehicleDamageValidation.Impact(car, 10f);
+                    expectedPayout = car.SalePrice;
+                    Assert(expectedPayout < firstGuest.SalePrice, "Damage did not lower sale offer");
                     Assert(session.Delivery.TrySell(car), "Park and talk sale failed");
-                    Assert(session.Money == firstGuest.SalePrice && session.ReservedCar == null, "Incorrect sale payment or reservation");
-                    Assert(!session.Delivery.TrySell(car) && session.Money == firstGuest.SalePrice, "Duplicate payment");
+                    Assert(session.Money == expectedPayout && session.ReservedCar == null, "Incorrect sale payment or reservation");
+                    Assert(!session.Delivery.TrySell(car) && session.Money == expectedPayout, "Duplicate payment");
                     session.Player.TeleportTo(session.BusStops[1].transform.position + Vector3.back * 2f + Vector3.up * 0.1f, Quaternion.identity);
                     Assert(session.TakeBus(), "Bus failed to return player");
                     Assert(Vector3.Distance(session.Player.transform.position, Field<Transform>(session, "hotelReturn").position) < 0.1f, "Wrong bus destination");
@@ -122,7 +126,8 @@ namespace ValetGetaway.Editor
                 {
                     session.Player.TeleportTo(firstGuest.Guest.position + new Vector3(-0.8f, -1f, -0.5f), Quaternion.identity);
                     Assert(firstGuest.HandOverKeys(session), $"Replacement guest cannot hand over keys: state={firstGuest.State}, talk={firstGuest.CanTalk(session)}, reserved={session.ReservedCar}, delivery={session.Delivery.HasDelivery}");
-                    Assert(session.Money == firstGuest.SalePrice, "Money did not survive return loop");
+                    Assert(session.Money == expectedPayout, "Money did not survive return loop");
+                    Assert(firstGuest.GetComponent<VehicleInteraction>().Condition == 1f, "Replacement car was not repaired");
                     Debug.Log("VALET HOTEL VALIDATION PASSED: visible arrival, waiting guest, key handover, drive, discovery, parking/speed gates, sale payment, duplicate prevention, bus teleport, replacement guest.");
                     Stop();
                 }

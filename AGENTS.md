@@ -10,7 +10,11 @@ computer; it records the last verified state and unfinished work.
   only at runtime. Preserve their scene work and take a backup before rebuilding.
 - Keep `.meta` files with assets. Do not commit Unity caches, logs, local credentials,
   or machine-specific paths. Do not upgrade Unity/packages just to open the project.
-- Use Kenney City Kit (Roads), Car Kit, and City Kit (Commercial). Preserve their licenses.
+- Existing gameplay assets use Kenney City Kit (Roads), Car Kit, and City Kit (Commercial).
+  The user-requested island city uses Broken Vector Low Poly Road Pack at
+  Assets/BrokenVector/LowPolyRoadPack. Preserve all asset licenses.
+- New visual layout: Assets/Scenes/ValetIslandCity.unity. It is not yet a gameplay
+  replacement for ValetTestCity; see the latest HANDOFF.md entry.
 - Buyers wander, remain undisclosed until seen, and then receive directions. A sale
   requires a stopped car nearby and an on-foot conversation; retain these conditions.
 - Do not claim gameplay validation passed without a fresh Console result. The

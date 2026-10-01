@@ -83,6 +83,15 @@ namespace ValetGetaway
                 Panel(new Rect(12, 12, width - 264, 78), session.Objective, 25, Color.white);
                 Panel(new Rect(Screen.width - 264, 12, 252, 78), $"MONEY  ${session.Money:N0}\nCARS SOLD  {session.Delivery.DeliveriesCompleted}", 24, new Color(0.45f, 1f, 0.7f));
             }
+            VehicleInteraction car = session.ReservedCar;
+            if (car != null)
+            {
+                Color conditionColor = Color.Lerp(new Color(1f, 0.35f, 0.25f), new Color(0.45f, 1f, 0.7f), car.Condition);
+                string speed = activeVehicle != null ? $"{Mathf.RoundToInt(Mathf.Abs(activeVehicle.Speed) * 2.237f)} MPH   |   " : "";
+                Panel(new Rect(12, headerBottom + 4, width, 58),
+                    $"{speed}CONDITION {car.Condition:P0}   |   SALE ${car.SalePrice:N0}", narrow ? 18 : 22, conditionColor);
+                headerBottom += 66f;
+            }
             Panel(new Rect(12, Screen.height - 82, width, 70), session.Prompt, 23, Color.white);
             if (!string.IsNullOrEmpty(session.Notification))
                 Panel(new Rect(12, Screen.height - 154, width, 64), session.Notification, 21, new Color(1f, 0.83f, 0.3f));

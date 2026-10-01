@@ -84,7 +84,7 @@ namespace ValetGetaway
         public void PayForSale(VehicleInteraction car)
         {
             Money += car.SalePrice;
-            Notify($"Car sold! +${car.SalePrice:N0}");
+            Notify($"Car sold! +${car.SalePrice:N0} ({car.Condition:P0} condition)");
             if (ReservedCar == car) ReservedCar = null;
             currentCar = null;
             HotelGuestCar guest = car.GetComponent<HotelGuestCar>();

@@ -18,7 +18,47 @@ namespace ValetGetaway
         private bool awaitingReset;
         private HotelGameSession session;
         private HotelGuestCar guest;
-        public int SalePrice => guest != null ? guest.SalePrice : 2500;
+        [Header("Vehicle condition")]
+        [SerializeField, Min(0f)] private float harmlessImpactSpeed = 3f;
+        [SerializeField, Min(0f)] private float conditionLossPerMetrePerSecond = 0.045f;
+        [SerializeField, Range(0f, 1f)] private float minimumValueFraction = 0.2f;
+        private float condition = 1f;
+        private float nextDamageAt;
+        public float Condition => condition;
+        public int BaseSalePrice => guest != null ? guest.SalePrice : 2500;
+        public int SalePrice => Mathf.RoundToInt(BaseSalePrice * Mathf.Lerp(minimumValueFraction, 1f, condition));
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (awaitingReset || (guest != null ? !guest.KeysReceived : !vehicle.HasDriver)) return;
+            // Measure closing speed into a surface, not sideways speed along it.
+            // Ignore upward-facing ground contacts so ordinary road travel is free.
+            float impactSpeed = 0f;
+            for (int i = 0; i < collision.contactCount; i++)
+            {
+                Vector3 normal = collision.GetContact(i).normal;
+                if (normal.y > 0.65f) continue;
+                impactSpeed = Mathf.Max(impactSpeed, Mathf.Abs(Vector3.Dot(collision.relativeVelocity, normal)));
+            }
+            ApplyImpact(impactSpeed);
+        }
+
+        internal void ApplyImpact(float impactSpeed)
+        {
+            if (float.IsNaN(impactSpeed) || float.IsInfinity(impactSpeed) ||
+                impactSpeed <= harmlessImpactSpeed || Time.time < nextDamageAt || condition <= 0f) return;
+            int oldPrice = SalePrice;
+            condition = Mathf.Clamp01(condition - (impactSpeed - harmlessImpactSpeed) * conditionLossPerMetrePerSecond);
+            nextDamageAt = Time.time + 0.35f;
+            if (session != null && oldPrice > SalePrice)
+                session.Notify($"Collision! Value -${oldPrice - SalePrice:N0}. Drive carefully.");
+        }
+
+        private void ResetCondition()
+        {
+            condition = 1f;
+            nextDamageAt = 0f;
+        }
 
         private void Start()
         {
@@ -89,7 +129,11 @@ namespace ValetGetaway
             if (session != null) session.SetCurrentCar(this);
         }
 
-        public void PrepareForGuest() => awaitingReset = false;
+        public void PrepareForGuest()
+        {
+            awaitingReset = false;
+            ResetCondition();
+        }
 
         public void CompleteDelivery()
         {
@@ -104,6 +148,7 @@ namespace ValetGetaway
 
         public void ResetAfterDelivery()
         {
+            ResetCondition();
             transform.SetPositionAndRotation(startingPosition, startingRotation);
             Rigidbody body = GetComponent<Rigidbody>();
             body.position = startingPosition;

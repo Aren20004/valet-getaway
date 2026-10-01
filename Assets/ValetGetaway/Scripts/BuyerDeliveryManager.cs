@@ -13,6 +13,9 @@ namespace ValetGetaway
         [SerializeField] private float discoveryDistance = 24f;
         private Material glowMaterial;
         private HotelGameSession session;
+        [SerializeField] private NavMeshSurface navigationSurface;
+        public Transform[] Buyers => buyers;
+        public void SetNavigationSurface(NavMeshSurface surface) => navigationSurface=surface;
         public VehicleInteraction AssignedCar => assignedCar;
         public Transform VisibleBuyer => HasDelivery && BuyerDiscovered ? buyers[selectedBuyer] : null;
         public bool BuyerDiscovered { get; private set; }
@@ -25,12 +28,16 @@ namespace ValetGetaway
             glowMaterial = new Material(highlightMaterial);
             glowMaterial.EnableKeyword("_EMISSION");
             glowMaterial.SetColor("_EmissionColor", new Color(1f, 0.65f, 0.05f) * 2f);
-            Transform area = transform.parent.Find("Test Area");
-            NavMeshSurface surface = area.GetComponent<NavMeshSurface>();
-            if (surface == null) surface = area.gameObject.AddComponent<NavMeshSurface>();
-            surface.collectObjects = CollectObjects.Children;
-            surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-            surface.BuildNavMesh();
+            var surface=navigationSurface;
+            if(surface==null)
+            {
+                Transform area=transform.parent.Find("Test Area");
+                surface=area.GetComponent<NavMeshSurface>();
+                if(surface==null) surface=area.gameObject.AddComponent<NavMeshSurface>();
+                surface.collectObjects=CollectObjects.Children;
+                surface.useGeometry=NavMeshCollectGeometry.PhysicsColliders;
+            }
+            if(surface.navMeshData==null) surface.BuildNavMesh();
             foreach (Transform buyer in buyers)
             {
                 BuyerWander wander = buyer.GetComponent<BuyerWander>();

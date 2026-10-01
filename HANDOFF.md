@@ -1,5 +1,29 @@
 # Desktop Handoff
 
+## Playable Full Island Update - October 1, 2026
+
+The saved scene `Assets/Scenes/ValetIslandCity.unity` now contains the playable
+valet setup as well as the expanded island layout. The gameplay root uses the
+existing player, car, buyer, guest, HUD, hotel, and bus mechanics on this scene.
+
+- Added routed hotel arrivals on the hotel island, city-wide buyer locations, a
+  baked island navigation surface, five island bus stops, and water/stuck-car
+  recovery (`R` while driving).
+- Expanded the city toward the supplied full-island reference with outer roads,
+  larger buildings, wooded hills, ponds/streams, a southern marina, and additional
+  residential/warehouse districts. The layout remains an editable saved scene.
+- The lower city road now ends in a literal jump ramp over the water.
+- The hotel arrival road is a one-way loop. The bridge connection splits into a
+  dedicated entry and exit branch with a divider and one-way arrows.
+- Added the supplied full-island image to `SourceAssets/Design/FullIslandReference.png`.
+
+Validation status: the scene build and gameplay setup passed. Automated playtesting
+confirmed physical bridge driving and jump-ramp launch. The remaining automated
+loop test has a stale phase-state failure after the ramp check, so full buyer-sale-
+bus replacement validation is still pending manual play in the Unity Game view.
+Do not describe the complete gameplay loop as fully validated until that manual
+check or a corrected harness passes.
+
 ## Road, Bridge, and Building Fixes - October 1, 2026
 
 Last night's work was committed and pushed first as `1443d4d` on `main` at

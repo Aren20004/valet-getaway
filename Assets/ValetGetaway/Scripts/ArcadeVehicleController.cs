@@ -14,6 +14,8 @@ namespace ValetGetaway
         [SerializeField] private float braking = 8f;
 
         private Rigidbody body;
+        public float LastThrottle { get; private set; }
+        public bool Grounded { get; private set; }
 
         public bool HasDriver { get; set; }
         public float Speed => body == null ? 0f : Vector3.Dot(body.linearVelocity, transform.forward);
@@ -35,14 +37,23 @@ namespace ValetGetaway
             float throttle = 0f;
             if (Keyboard.current.wKey.isPressed) throttle += 1f;
             if (Keyboard.current.sKey.isPressed) throttle -= 1f;
+            LastThrottle=throttle;
 
             float steerInput = 0f;
             if (Keyboard.current.dKey.isPressed) steerInput += 1f;
             if (Keyboard.current.aKey.isPressed) steerInput -= 1f;
 
-            bool grounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 1.2f);
+            // Axle probes retain traction on the jump ramp when the flat arcade
+            // chassis is supported at one end and its center is above the slope.
+            bool grounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 1.2f) ||
+                Physics.Raycast(transform.TransformPoint(new Vector3(0,.3f,1.7f)),Vector3.down,1.5f) ||
+                Physics.Raycast(transform.TransformPoint(new Vector3(0,.3f,-1.7f)),Vector3.down,1.5f);
+            Grounded=grounded;
             if (!grounded)
             {
+                // Keep momentum through jumps so a launch ramp carries the car
+                // over the water instead of freezing it at the lip.
+                if (Mathf.Abs(throttle)>0.01f) body.AddForce(transform.forward*throttle*acceleration*.55f,ForceMode.Acceleration);
                 return;
             }
 

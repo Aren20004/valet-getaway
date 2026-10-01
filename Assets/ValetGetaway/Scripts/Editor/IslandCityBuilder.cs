@@ -21,13 +21,13 @@ namespace ValetGetaway.Editor
         static readonly List<float> widths = new List<float>();
         static readonly List<Rect> lots = new List<Rect>();
         static readonly List<IslandRoadJunctions.Surface> roadSurfaces = new List<IslandRoadJunctions.Surface>();
-        static Transform roads, buildings, terrain, props;
-        static Material grass, sand, water, stone, roof, glass, gold;
+        internal static Transform roads, buildings, terrain, props;
+        internal static Material grass, sand, water, stone, roof, glass, gold;
         static Material[] districts;
         static int meshIndex;
         static Vector2[] cityBoundary;
         static readonly Dictionary<Material, Material> converted = new Dictionary<Material, Material>();
-        static Vector3 W(Vector2 p, float y=0) => new Vector3(p.x-500, y, 240-p.y);
+        internal static Vector3 W(Vector2 p, float y=0) => new Vector3(p.x-500, y, 240-p.y);
         static Vector2[] Points(params float[] v) { var a=new Vector2[v.Length/2]; for(int i=0;i<a.Length;i++) a[i]=new Vector2(v[i*2],v[i*2+1]); return a; }
 
         [MenuItem("Valet Getaway/Open Island City")]
@@ -65,16 +65,16 @@ namespace ValetGetaway.Editor
             stone=Mat("Pale pavement",new Color(.64f,.66f,.60f)); roof=Mat("Ivory roofs",new Color(.83f,.85f,.78f)); glass=Mat("Blue glass",new Color(.15f,.31f,.39f)); gold=Mat("Hotel sandstone",new Color(.73f,.55f,.31f));
             districts=new[]{Mat("Residential sage",new Color(.61f,.73f,.63f)),Mat("Commercial blue",new Color(.55f,.68f,.76f)),Mat("Downtown cream",new Color(.79f,.76f,.65f))};
             Box("Water",new Vector2(530,230),new Vector3(2000,2,1400),-8,water,terrain,false);
-            Island("City island",Points(-70,-90, 210,-105, 370,-75, 452,-15, 500,35, 534,82, 548,126, 623,140, 658,185, 666,208, 646,233, 650,275, 628,305, 637,349, 645,424, 592,470, 485,512, 300,525, 126,501, 25,463, -51,380, -83,248, -94,70));
+            Island("City island",IslandReferenceExpansion.CityOutline());
             Island("Hotel island",Points(816,-80, 989,-90, 1114,14, 1140,170, 1118,361, 1035,468, 918,488, 822,424, 742,350, 726,308, 744,264, 754,198, 773,103, 779,18));
 
             Road("West arterial and bridge approach",20,Points(36,-65,36,80,43,110,64,141,66,184,83,225,111,243,180,247,350,247,520,247,650,247));
-            Road("Northwest loop",12,Points(200,-52,200,12,150,12,125,23,115,50,115,88,125,111,151,118,172,136,181,173));
+            Road("Northwest loop",12,Points(200,50,200,12,150,12,125,23,115,50,115,88,125,111,151,118,172,136,181,173));
             Road("Northwest connector",12,Points(151,118,160,95,182,85,237,85,264,78,279,54,284,36,304,29,393,29,423,35,443,56,452,81,480,94,496,113,499,135,483,147,435,147));
             Road("North winding boulevard",18,Points(245,114,305,114,331,109,359,88,381,80,403,83,424,98,435,119,435,178,438,206,453,228,478,242,510,247));
             Road("West cross street",18,Points(65,174,145,174,245,174,267,171,287,160,302,142,309,115));
             Road("Inner S bend",14,Points(350,302,350,221,350,180,359,158,378,148,436,148));
-            Road("Hotel bridge connection",20,Points(770,247,818,247,852,247));
+            Road("Hotel bridge connection",20,Points(770,247,800,247,832,247));
             Road("South waterfront curve",14,Points(510,247,548,252,567,267,575,291,575,348,573,380,562,399,537,411,488,415,444,422,428,439,422,482));
             Road("South cross avenue",14,Points(198,302,290,302,400,302,496,302,575,302,632,302));
             Road("Lower downtown grid west",14,Points(198,285,198,349,198,414,198,493));
@@ -85,9 +85,14 @@ namespace ValetGetaway.Editor
             Road("Valet city ramp east",10,Points(198,285,222,259,249,247));
             Road("Parking access",10,Points(453,302,458,328,477,337,493,337));
             Road("Waterfront slip",10,Points(575,290,594,268,621,251,642,247));
-            Road("Hotel arrival loop",14,Points(852,247,872,269,878,299,902,319,953,319,981,302,991,277,985,249,965,228,920,222,882,225,852,247));
+            Road("Hotel arrival loop - one way",9,Points(868,270,878,299,902,319,953,319,981,302,991,277,985,249,965,228,920,222,882,225,865,238,860,254,868,270),true);
+            Road("Hotel one-way entry",7,Points(822,250,842,251,856,256,868,270),true);
+            Road("Hotel one-way exit",7,Points(865,238,853,241,839,244,822,244),true);
             Road("Hotel parking access",10,Points(970,316,1007,334,1065,334));
             Bridge();
+            Road("North district continuation",12,Points(200,-70,200,12));
+            Road("West inner connecting bend",10,Points(258,174,260,194,269,209,278,228,278,247));
+            IslandReferenceExpansion.AddRoads();
 
             // Landmark footprints follow the image; smaller homes fill curved street edges.
             Lot(96,141,25,47,18,0); Lot(216,135,55,45,22,1); Lot(174,218,48,36,20,1);
@@ -102,7 +107,9 @@ namespace ValetGetaway.Editor
             HomesAlong(paths[2],12); HomesAlong(paths[3],18); HomesAlong(paths[4],18); HomesAlong(paths[5],14); HomesAlong(paths[7],14);
             Parking(new Vector2(513,350),45,66,props);
             Hotel();
+            IslandReferenceExpansion.AddScenery();
             IslandRoadJunctions.Trim(roadSurfaces);
+            JumpRamp();
             Trees();
             LightAndCamera();
             AssetDatabase.SaveAssets(); EditorSceneManager.SaveScene(scene,ScenePath);
@@ -112,7 +119,7 @@ namespace ValetGetaway.Editor
 
         static IEnumerable<Scene> GetLoadedScenes() { for(int i=0;i<SceneManager.sceneCount;i++) yield return SceneManager.GetSceneAt(i); }
         static Transform Group(string name) => new GameObject(name).transform;
-        static Material Mat(string name, Color color)
+        internal static Material Mat(string name, Color color)
         {
             string path=Generated+"/Materials/"+name+".mat";
             var m=AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -127,7 +134,7 @@ namespace ValetGetaway.Editor
             if(source.HasProperty("_MainTex")) m.SetTexture("_BaseMap",source.GetTexture("_MainTex"));
             converted[source]=m; return m;
         }
-        static GameObject Box(string name,Vector2 p,Vector3 size,float bottom,Material material,Transform parent,bool collision=true)
+        internal static GameObject Box(string name,Vector2 p,Vector3 size,float bottom,Material material,Transform parent,bool collision=true)
         {
             var o=GameObject.CreatePrimitive(PrimitiveType.Cube); o.name=name; o.transform.SetParent(parent);
             o.transform.position=W(p,bottom+size.y/2); o.transform.localScale=size; o.GetComponent<Renderer>().sharedMaterial=material;
@@ -135,6 +142,13 @@ namespace ValetGetaway.Editor
         }
         static void Island(string name,Vector2[] outline)
         {
+            var rounded=new List<Vector2>();
+            for(int i=0;i<outline.Length;i++)
+            {
+                var a=outline[(i+outline.Length-1)%outline.Length]; var b=outline[i]; var c=outline[(i+1)%outline.Length]; var d=outline[(i+2)%outline.Length];
+                for(int j=0;j<5;j++) { float t=j/5f; rounded.Add(.5f*(2*b+(-a+c)*t+(2*a-5*b+4*c-d)*t*t+(-a+3*b-3*c+d)*t*t*t)); }
+            }
+            outline=rounded.ToArray();
             var center=Vector2.zero; foreach(var p in outline) center+=p; center/=outline.Length;
             var inner=new Vector2[outline.Length]; for(int i=0;i<inner.Length;i++) inner[i]=Vector2.Lerp(outline[i],center,.028f);
             if(name=="City island") cityBoundary=inner;
@@ -145,12 +159,22 @@ namespace ValetGetaway.Editor
         static void Fan(string name,Vector2[] outline,float y,Material mat)
         {
             Vector2 center=Vector2.zero; foreach(var p in outline) center+=p; center/=outline.Length;
-            var verts=new Vector3[outline.Length+1]; verts[0]=W(center,y);
-            var tris=new int[outline.Length*3];
-            for(int i=0;i<outline.Length;i++) { verts[i+1]=W(outline[i],y); tris[3*i]=0; tris[3*i+1]=i+1; tris[3*i+2]=(i+1)%outline.Length+1; }
-            MeshObject(name,verts,tris,null,new[]{mat},terrain);
+            float radius=0; foreach(var p in outline) radius=Mathf.Max(radius,Vector2.Distance(center,p));
+            int rings=Mathf.CeilToInt(radius/150),count=outline.Length;
+            var verts=new List<Vector3>{W(center,y)}; var tris=new List<int>();
+            for(int ring=1;ring<=rings;ring++)
+            {
+                for(int i=0;i<count;i++) verts.Add(W(Vector2.Lerp(center,outline[i],(float)ring/rings),y));
+                for(int i=0;i<count;i++)
+                {
+                    int current=1+(ring-1)*count+i,next=1+(ring-1)*count+(i+1)%count;
+                    if(ring==1) tris.AddRange(new[]{0,current,next});
+                    else tris.AddRange(new[]{current-count,current,next,current-count,next,next-count});
+                }
+            }
+            MeshObject(name,verts.ToArray(),tris.ToArray(),null,new[]{mat},terrain);
         }
-        static GameObject MeshObject(string name,Vector3[] vertices,int[] triangles,Vector2[] uv,Material[] mats,Transform parent)
+        internal static GameObject MeshObject(string name,Vector3[] vertices,int[] triangles,Vector2[] uv,Material[] mats,Transform parent)
         {
             var mesh=new Mesh { name=name, indexFormat=IndexFormat.UInt32 }; mesh.vertices=vertices; mesh.triangles=triangles; if(uv!=null) mesh.uv=uv; mesh.RecalculateNormals(); mesh.RecalculateBounds();
             AssetDatabase.CreateAsset(mesh,Generated+"/Meshes/"+(meshIndex++).ToString("D4")+".asset");
@@ -168,10 +192,10 @@ namespace ValetGetaway.Editor
             }
             result.Add(p[p.Length-1]); return result;
         }
-        static void Road(string name,float width,Vector2[] controls)
+        internal static void Road(string name,float width,Vector2[] controls,bool oneWay=false)
         {
             var line=Smooth(controls); paths.Add(line); widths.Add(width);
-            var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(Pack+"Prefabs/Freeway Straight 2.prefab");
+            var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(Pack+"Prefabs/"+(oneWay ? "SingleLane Straight 2" : "Freeway Straight 2")+".prefab");
             var source=prefab.GetComponent<MeshFilter>().sharedMesh; var bounds=source.bounds;
             float[] distances=new float[line.Count]; for(int i=1;i<line.Count;i++) distances[i]=distances[i-1]+Vector2.Distance(line[i-1],line[i]);
             int tiles=Mathf.CeilToInt(distances[distances.Length-1]/5f);
@@ -179,6 +203,8 @@ namespace ValetGetaway.Editor
             var curbTriangles=new List<bool>();
             var triangleSegments=new List<int>();
             var sv=source.vertices; var su=source.uv; var st=source.triangles;
+            float asphaltHalf=0;
+            foreach(var vertex in sv) if(Mathf.Abs(vertex.y)<.001f) asphaltHalf=Mathf.Max(asphaltHalf,Mathf.Abs(vertex.x-bounds.center.x)/bounds.size.x*width);
             var centers=new Vector2[tiles+1]; var normals=new Vector2[tiles+1];
             for(int tile=0;tile<=tiles;tile++)
             {
@@ -216,9 +242,30 @@ namespace ValetGetaway.Editor
                 Vector3 a=W(centers[i]),b=W(centers[i+1]);
                 var na=new Vector2(normals[i].x,-normals[i].y); var nb=new Vector2(normals[i+1].x,-normals[i+1].y);
                 surface.Full.Add(new IslandRoadJunctions.Quad(new Vector2(a.x,a.z),new Vector2(b.x,b.z),na,nb,width*.5f));
-                surface.Asphalt.Add(new IslandRoadJunctions.Quad(new Vector2(a.x,a.z),new Vector2(b.x,b.z),na,nb,width*.4f));
+                surface.Asphalt.Add(new IslandRoadJunctions.Quad(new Vector2(a.x,a.z),new Vector2(b.x,b.z),na,nb,asphaltHalf));
             }
             roadSurfaces.Add(surface);
+        }
+        static void JumpRamp()
+        {
+            var verts=new List<Vector3>(); var tris=new List<int>();
+            for(int i=0;i<=20;i++)
+            {
+                float t=i/20f; float x=602+48*t; float h=.22f+16*t*t;
+                verts.Add(W(new Vector2(x,296),h)); verts.Add(W(new Vector2(x,308),h));
+                if(i>0) { int n=i*2; tris.AddRange(new[]{n-2,n,n-1,n-1,n,n+1}); }
+            }
+            MeshObject("Waterfront jump ramp",verts.ToArray(),tris.ToArray(),null,new[]{Mat("Ramp asphalt",new Color(.22f,.24f,.26f))},roads);
+            Label("JUMP",W(new Vector2(615,302),1.2f),Quaternion.Euler(90,90,0),8,roads);
+        }
+        static void DirectionArrow(Vector2 p,float heading)
+        {
+            var pivot=new GameObject("ONE WAY arrow").transform; pivot.SetParent(props); pivot.position=W(p,.29f); pivot.rotation=Quaternion.Euler(0,heading,0);
+            var mesh=new Mesh { name="Direction arrow" };
+            mesh.vertices=new[]{new Vector3(-.3f,0,-2),new Vector3(.3f,0,-2),new Vector3(.3f,0,.4f),new Vector3(1.1f,0,.4f),new Vector3(0,0,2),new Vector3(-1.1f,0,.4f),new Vector3(-.3f,0,.4f)};
+            mesh.triangles=new[]{0,6,1,1,6,2,5,4,3}; mesh.RecalculateNormals();
+            AssetDatabase.CreateAsset(mesh,Generated+"/Meshes/Arrow_"+p.x+"_"+p.y+".asset");
+            pivot.gameObject.AddComponent<MeshFilter>().sharedMesh=mesh; pivot.gameObject.AddComponent<MeshRenderer>().sharedMaterial=roof;
         }
         static void Bridge()
         {
@@ -235,8 +282,11 @@ namespace ValetGetaway.Editor
             o.GetComponent<MeshFilter>().sharedMesh=mesh; o.GetComponent<MeshCollider>().sharedMesh=mesh;
             var rr=o.GetComponent<Renderer>(); var materials=rr.sharedMaterials; for(int i=0;i<materials.Length;i++) materials[i]=Convert(materials[i]); rr.sharedMaterials=materials;
         }
-        static void Lot(float x,float y,float width,float depth,float height,int district,float rotation=0)
+        internal static void Lot(float x,float y,float width,float depth,float height,int district,float rotation=0)
         {
+            height*=1.2f;
+            // Keep enlarged parcels out of travel lanes, including rotated homes.
+            for(int pass=0;pass<12 && ParcelTouchesRoad(new Vector2(x,y),width+3,depth+3,rotation);pass++) { width*=.94f; depth*=.94f; }
             lots.Add(new Rect(x-width/2-2,y-depth/2-2,width+4,depth+4));
             var group=new GameObject("Building "+lots.Count+" - "+(district==0?"residential":district==1?"commercial":"downtown")).transform; group.SetParent(buildings);
             Box("Footprint",new Vector2(x,y),new Vector3(width+3,.25f,depth+3),0,stone,group);
@@ -262,12 +312,28 @@ namespace ValetGetaway.Editor
             Label(text,W(p+new Vector2(0,depth/2+.06f),top*.65f),Quaternion.identity,width*.85f,parent);
             Label(text,W(p-new Vector2(0,depth/2+.06f),top*.65f),Quaternion.Euler(0,180,0),width*.85f,parent);
         }
-        static bool Clear(Vector2 p,float radius)
+        internal static bool Clear(Vector2 p,float radius)
         {
             if(!Inside(p,cityBoundary)) return false;
             for(int j=0;j<paths.Count;j++) foreach(var q in paths[j]) if(Vector2.Distance(p,q)<radius+widths[j]/2+2) return false;
             foreach(var lot in lots) if(new Rect(lot.xMin-radius,lot.yMin-radius,lot.width+2*radius,lot.height+2*radius).Contains(p)) return false;
-            return p.x>75 && p.x<615 && p.y>24 && p.y<475;
+            return true;
+        }
+        internal static float RoadClearance(Vector2 p)
+        {
+            float clearance=float.MaxValue;
+            for(int i=0;i<paths.Count;i++) foreach(var q in paths[i]) clearance=Mathf.Min(clearance,Vector2.Distance(p,q)-widths[i]/2);
+            return clearance;
+        }
+        static bool ParcelTouchesRoad(Vector2 center,float width,float depth,float rotation)
+        {
+            float angle=-rotation*Mathf.Deg2Rad,c=Mathf.Cos(angle),s=Mathf.Sin(angle);
+            for(int i=0;i<paths.Count;i++) foreach(var point in paths[i])
+            {
+                var delta=point-center; var local=new Vector2(c*delta.x-s*delta.y,s*delta.x+c*delta.y);
+                if(Mathf.Abs(local.x)<width/2+widths[i]/2+.6f && Mathf.Abs(local.y)<depth/2+widths[i]/2+.6f) return true;
+            }
+            return false;
         }
         static bool Inside(Vector2 p, Vector2[] polygon)
         {
@@ -284,7 +350,7 @@ namespace ValetGetaway.Editor
                 foreach(int side in new[]{-1,1})
                 {
                     var p=line[i]+new Vector2(-tangent.y,tangent.x)*side*(width/2+12);
-                    if(Clear(p,9)) Lot(p.x,p.y,11,13,7+(i%3)*2,0,Mathf.Atan2(tangent.y,tangent.x)*Mathf.Rad2Deg);
+                    if(Clear(p,11)) Lot(p.x,p.y,15,20,9+(i%3)*2,0,Mathf.Atan2(tangent.y,tangent.x)*Mathf.Rad2Deg);
                 }
             }
         }
@@ -310,6 +376,11 @@ namespace ValetGetaway.Editor
             Box("Entrance walk",new Vector2(924,207),new Vector3(32,.2f,14),.1f,stone,hotel);
             Parking(new Vector2(1037,371),82,58,hotel);
             Road("Hotel parking entrance",10,Points(1037,334,1037,348));
+            Box("Valet pull-off apron",new Vector2(918,214),new Vector3(76,.18f,12),.08f,Mat("Parking asphalt",new Color(.22f,.25f,.26f)),hotel);
+            Box("Hotel entry exit divider",new Vector2(844,247),new Vector3(10,.2f,1.5f),.22f,stone,hotel);
+            DirectionArrow(new Vector2(841,252),112); DirectionArrow(new Vector2(842,243),-90);
+            DirectionArrow(new Vector2(878,292),170); DirectionArrow(new Vector2(929,319),90);
+            DirectionArrow(new Vector2(989,278),0); DirectionArrow(new Vector2(928,222),-90);
             var pool=GameObject.CreatePrimitive(PrimitiveType.Cylinder); pool.name="Arrival fountain"; pool.transform.SetParent(hotel); pool.transform.position=W(new Vector2(931,272),.8f); pool.transform.localScale=new Vector3(26,1,26); pool.GetComponent<Renderer>().sharedMaterial=stone;
             var inner=GameObject.CreatePrimitive(PrimitiveType.Cylinder); inner.name="Fountain water"; inner.transform.SetParent(hotel); inner.transform.position=W(new Vector2(931,272),1.82f); inner.transform.localScale=new Vector3(23,.02f,23); inner.GetComponent<Renderer>().sharedMaterial=water;
             for(int i=0;i<3;i++) Box("Valet bay "+(i+1),new Vector2(896+i*12,209),new Vector3(9,.1f,6),.25f,roof,hotel,false);
@@ -336,8 +407,8 @@ namespace ValetGetaway.Editor
         {
             var sun=new GameObject("Sun").AddComponent<Light>(); sun.type=LightType.Directional; sun.intensity=1.1f; sun.shadows=LightShadows.Soft; sun.transform.rotation=Quaternion.Euler(50,-30,0);
             RenderSettings.ambientMode=AmbientMode.Flat; RenderSettings.ambientLight=new Color(.3f,.34f,.4f); RenderSettings.fog=false;
-            var camera=new GameObject("City overview camera").AddComponent<Camera>(); camera.tag="MainCamera"; camera.orthographic=true; camera.orthographicSize=365; camera.farClipPlane=3000; camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=new Color(.16f,.28f,.39f);
-            camera.transform.SetPositionAndRotation(W(new Vector2(525,218),45),Quaternion.Euler(90,0,0));
+            var camera=new GameObject("City overview camera").AddComponent<Camera>(); camera.tag="MainCamera"; camera.orthographic=true; camera.orthographicSize=525; camera.farClipPlane=3000; camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=new Color(.16f,.28f,.39f);
+            camera.transform.SetPositionAndRotation(W(new Vector2(401,274),1000),Quaternion.Euler(90,0,0));
             if(SceneView.lastActiveSceneView!=null) SceneView.lastActiveSceneView.LookAt(W(new Vector2(525,218)),Quaternion.Euler(65,0,0),650);
         }
         public static void Validate()
@@ -378,7 +449,7 @@ namespace ValetGetaway.Editor
                 for(int i=1;i<line.Count-1;i+=2)
                 {
                     var tangent=(line[i+1]-line[i-1]).normalized;
-                    foreach(float lane in new[] { -.25f,0,.25f })
+                    foreach(float lane in new[] { -.15f,0,.15f })
                     {
                         var point=line[i]+new Vector2(-tangent.y,tangent.x)*widths[route]*lane;
                         bool driveable=false;
@@ -403,7 +474,7 @@ namespace ValetGetaway.Editor
         public static void Capture()
         {
             Directory.CreateDirectory("Logs/Previews"); var camera=Camera.main;
-            Render(camera,"Logs/Previews/IslandCityOverview.png",1800,1050);
+            Render(camera,"Logs/Previews/IslandCityOverview.png",1800,1200);
             camera.transform.SetPositionAndRotation(W(new Vector2(300,220),45),Quaternion.Euler(90,0,0)); camera.orthographicSize=285;
             Render(camera,"Logs/Previews/IslandCityReferenceView.png",1200,900);
             camera.transform.position=W(new Vector2(1000,480),180); camera.transform.LookAt(W(new Vector2(910,210),6)); camera.orthographicSize=145;

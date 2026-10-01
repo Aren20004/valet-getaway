@@ -16,6 +16,8 @@ namespace ValetGetaway
         private string notification;
         private float notificationUntil;
         private float busReadyAt;
+        private bool islandControls;
+        private void Start() => islandControls=Object.FindAnyObjectByType<IslandRecovery>()!=null;
         public ThirdPersonPlayerController Player => player;
         public BuyerDeliveryManager Delivery => delivery;
         public Camera ViewCamera => followCamera.GetComponent<Camera>();
@@ -97,7 +99,7 @@ namespace ValetGetaway
             guest.ScheduleArrival(0f);
         }
 
-        public string Objective => delivery.HasDelivery ? delivery.Objective : ReservedCar != null
+        public string Objective => delivery.HasDelivery ? islandControls && !delivery.BuyerDiscovered ? "Drive across the bridge and look for a buyer in the city" : delivery.Objective : ReservedCar != null
             ? "Keys received. Take the guest's car." : Money > 0 && Vector3.Distance(player.transform.position, hotelReturn.position) > 20f
             ? "Take a bus back to the hotel" : "Speak to a guest at the hotel valet line";
 
@@ -106,7 +108,7 @@ namespace ValetGetaway
             get
             {
                 if (player.IsDriving) return delivery.BuyerDiscovered && delivery.CanDeliver
-                    ? "E  Exit and speak to buyer" : "WASD  Drive   |   SPACE  Brake   |   E  Exit";
+                    ? "E  Exit and speak to buyer" : "WASD  Drive   |   SPACE  Brake   |   E  Exit"+(islandControls ? "   |   R  Recover" : "");
                 if (delivery.CanTalk) return delivery.CanDeliver ? "E  Sell car to buyer" : "Buyer: Park closer and stop the car";
                 if (NearbyGuest() != null) return ReservedCar == null && !delivery.HasDelivery ? "E  Speak to guest and take keys" : "Finish your current delivery first";
                 if (NearbyBus() != null) return "E  Take bus to hotel";

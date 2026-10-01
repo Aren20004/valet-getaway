@@ -24,6 +24,8 @@ namespace ValetGetaway
         public VehicleInteraction ReservedCar { get; private set; }
         public int Money { get; private set; }
         public string Notification => Time.time < notificationUntil ? notification : "";
+        public Transform SpeechTarget { get; private set; }
+        public string SpeechText { get; private set; }
         public HotelGuestCar[] Guests => guests;
         public HotelBusStop[] BusStops => busStops;
 
@@ -35,7 +37,14 @@ namespace ValetGetaway
 
         public void Reserve(VehicleInteraction car) => ReservedCar = car;
         public void SetCurrentCar(VehicleInteraction car) => currentCar = car;
-        public void Notify(string message) { notification = message; notificationUntil = Time.time + 5f; }
+        public void Notify(string message) { SpeechTarget = null; SpeechText = ""; notification = message; notificationUntil = Time.time + 5f; }
+        public void NotifySpeech(Transform speaker, string message)
+        {
+            SpeechTarget = speaker;
+            SpeechText = message;
+            notification = message;
+            notificationUntil = Time.time + 5f;
+        }
 
         public HotelGuestCar NearbyGuest()
         {

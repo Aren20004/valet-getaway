@@ -138,7 +138,7 @@ namespace ValetGetaway
             body.isKinematic = false;
             controller.enabled = true;
             session.Reserve(interaction);
-            session.Notify($"{guestName}: Here are the keys. Take care of my car!");
+            session.NotifySpeech(guest, $"{guestName}: Here are the keys. Take care of my car!");
             return true;
         }
 

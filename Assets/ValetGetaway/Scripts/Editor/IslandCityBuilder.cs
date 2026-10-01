@@ -76,7 +76,9 @@ namespace ValetGetaway.Editor
             Road("Inner S bend",14,Points(350,302,350,221,350,180,359,158,378,148,436,148));
             Road("Hotel bridge connection",20,Points(770,247,800,247,832,247));
             Road("South waterfront curve",14,Points(510,247,548,252,567,267,575,291,575,348,573,380,562,399,537,411,488,415,444,422,428,439,422,482));
-            Road("South cross avenue",14,Points(198,302,290,302,400,302,496,302,575,302,632,302));
+            // Stop the avenue before the waterfront jump so it cannot pass underneath
+            // the launch deck or visually merge into its landing zone.
+            Road("South cross avenue",14,Points(198,302,290,302,400,302,496,302,555,302,575,302));
             Road("Lower downtown grid west",14,Points(198,285,198,349,198,414,198,493));
             Road("Lower downtown grid center",10,Points(282,302,282,410,282,493));
             Road("Lower downtown grid east",12,Points(350,302,350,412,350,493));
@@ -256,7 +258,20 @@ namespace ValetGetaway.Editor
                 if(i>0) { int n=i*2; tris.AddRange(new[]{n-2,n,n-1,n-1,n,n+1}); }
             }
             MeshObject("Waterfront jump ramp",verts.ToArray(),tris.ToArray(),null,new[]{Mat("Ramp asphalt",new Color(.22f,.24f,.26f))},roads);
+            // The launch crosses the water at the southern edge of the city. Give it
+            // visible concrete piers and a crossbeam so the elevated deck reads as a
+            // supported stunt structure instead of a floating strip of asphalt.
+            Material support=Mat("Ramp support concrete",new Color(.47f,.49f,.48f));
+            RampSupport(new Vector2(617,302),.22f+16f*Mathf.Pow((617f-602f)/48f,2f),support,"A");
+            RampSupport(new Vector2(637,302),.22f+16f*Mathf.Pow((637f-602f)/48f,2f),support,"B");
             Label("JUMP",W(new Vector2(615,302),1.2f),Quaternion.Euler(90,90,0),8,roads);
+        }
+        static void RampSupport(Vector2 p,float deckHeight,Material support,string suffix)
+        {
+            float bottom=-7.2f;
+            float pierHeight=Mathf.Max(1f,deckHeight-bottom-.65f);
+            Box("Jump ramp support pier "+suffix,p,new Vector3(4.5f,pierHeight,4.5f),bottom,support,props);
+            Box("Jump ramp support cap "+suffix,new Vector2(p.x,p.y),new Vector3(9f,.7f,5.5f),deckHeight-.85f,support,props);
         }
         static void DirectionArrow(Vector2 p,float heading)
         {

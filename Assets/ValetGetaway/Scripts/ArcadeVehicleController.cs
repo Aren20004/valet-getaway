@@ -12,6 +12,7 @@ namespace ValetGetaway
         [SerializeField] private float lateralGrip = 5f;
         [SerializeField] private float maxSpeed = 24f;
         [SerializeField] private float braking = 8f;
+        [SerializeField] private float slopeAlignment = 8f;
 
         private Rigidbody body;
         public float LastThrottle { get; private set; }
@@ -43,11 +44,10 @@ namespace ValetGetaway
             if (Keyboard.current.dKey.isPressed) steerInput += 1f;
             if (Keyboard.current.aKey.isPressed) steerInput -= 1f;
 
-            // Axle probes retain traction on the jump ramp when the flat arcade
-            // chassis is supported at one end and its center is above the slope.
-            bool grounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 1.2f) ||
-                Physics.Raycast(transform.TransformPoint(new Vector3(0,.3f,1.7f)),Vector3.down,1.5f) ||
-                Physics.Raycast(transform.TransformPoint(new Vector3(0,.3f,-1.7f)),Vector3.down,1.5f);
+            // Probe the center and both axles. Keeping the best hit lets the car
+            // follow the ramp's actual mesh normal instead of staying level.
+            RaycastHit groundHit;
+            bool grounded = TryGroundHit(out groundHit);
             Grounded=grounded;
             if (!grounded)
             {
@@ -66,7 +66,17 @@ namespace ValetGetaway
 
             float speedFactor = Mathf.Clamp01(Mathf.Abs(forwardSpeed) / 2f);
             float direction = Mathf.Abs(forwardSpeed) < 0.25f ? 1f : Mathf.Sign(forwardSpeed);
-            body.MoveRotation(body.rotation * Quaternion.Euler(0f, steerInput * steering * speedFactor * direction * Time.fixedDeltaTime, 0f));
+            Quaternion steered=body.rotation * Quaternion.Euler(0f, steerInput * steering * speedFactor * direction * Time.fixedDeltaTime, 0f);
+            if (grounded && Vector3.Angle(groundHit.normal, Vector3.up) > 2f)
+            {
+                Vector3 forward=Vector3.ProjectOnPlane(steered*Vector3.forward,groundHit.normal).normalized;
+                if (forward.sqrMagnitude>.01f)
+                {
+                    Quaternion slopeRotation=Quaternion.LookRotation(forward,groundHit.normal);
+                    steered=Quaternion.Slerp(body.rotation,slopeRotation,Mathf.Clamp01(slopeAlignment*Time.fixedDeltaTime));
+                }
+            }
+            body.MoveRotation(steered);
 
             Vector3 lateralVelocity = transform.right * Vector3.Dot(body.linearVelocity, transform.right);
             body.AddForce(-lateralVelocity * lateralGrip, ForceMode.Acceleration);
@@ -90,6 +100,23 @@ namespace ValetGetaway
 
             Vector3 horizontalVelocity = Vector3.ProjectOnPlane(body.linearVelocity, Vector3.up);
             body.AddForce(-horizontalVelocity * 0.45f, ForceMode.Acceleration);
+        }
+
+        private bool TryGroundHit(out RaycastHit best)
+        {
+            best=new RaycastHit();
+            float closest=float.MaxValue;
+            Vector3[] probes={
+                transform.position+Vector3.up*.1f,
+                transform.TransformPoint(new Vector3(0,.3f,1.7f)),
+                transform.TransformPoint(new Vector3(0,.3f,-1.7f))
+            };
+            foreach(Vector3 probe in probes)
+            {
+                if (!Physics.Raycast(probe,Vector3.down,out RaycastHit hit,1.8f)) continue;
+                if (hit.distance<closest) { closest=hit.distance; best=hit; }
+            }
+            return closest<float.MaxValue;
         }
     }
 }

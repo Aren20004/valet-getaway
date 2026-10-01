@@ -1,0 +1,7 @@
+*.cmd text eol=crlf
+*.command text eol=lf
+*.cs text eol=lf
+*.md text eol=lf
+*.fbx binary
+*.png binary
+*.zip binary

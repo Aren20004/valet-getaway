@@ -23,7 +23,8 @@ namespace ValetGetaway
             {
                 alignment = TextAnchor.MiddleLeft,
                 fontSize = 16,
-                padding = new RectOffset(14, 14, 10, 10)
+                padding = new RectOffset(16, 16, 8, 8),
+                normal = { background = Texture2D.whiteTexture, textColor = Color.white }
             };
 
             string text;
@@ -50,14 +51,18 @@ namespace ValetGetaway
             }
 
             Vector2 size = panel.CalcSize(new GUIContent(text));
-            GUI.Box(new Rect(20f, Screen.height - 60f, Mathf.Max(330f, size.x), 40f), text, panel);
+            float panelWidth = Mathf.Min(Mathf.Max(300f, size.x), Screen.width - 32f);
+            Panel(new Rect(16f, Screen.height - 54f, panelWidth, 38f), text, 16, Color.white);
         }
 
         private static void Panel(Rect rect, string text, int fontSize, Color color)
         {
             Color previous = GUI.color;
-            GUI.color = new Color(0.025f, 0.035f, 0.045f, 0.93f);
+            // A translucent glass panel keeps the map visible behind the HUD.
+            GUI.color = new Color(0.025f, 0.045f, 0.075f, 0.68f);
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            GUI.color = new Color(color.r, color.g, color.b, 0.72f);
+            GUI.DrawTexture(new Rect(rect.x, rect.y, Mathf.Min(72f, rect.width), 2f), Texture2D.whiteTexture);
             GUI.color = previous;
             GUIStyle style = new GUIStyle(GUI.skin.label)
             {
@@ -80,21 +85,21 @@ namespace ValetGetaway
             }
             else
             {
-                Panel(new Rect(12, 12, width - 264, 78), session.Objective, 25, Color.white);
-                Panel(new Rect(Screen.width - 264, 12, 252, 78), $"MONEY  ${session.Money:N0}\nCARS SOLD  {session.Delivery.DeliveriesCompleted}", 24, new Color(0.45f, 1f, 0.7f));
+                Panel(new Rect(12, 12, width - 276, 64), session.Objective, 22, Color.white);
+                Panel(new Rect(Screen.width - 276, 12, 264, 64), $"MONEY  ${session.Money:N0}   •   SOLD  {session.Delivery.DeliveriesCompleted}", 20, new Color(0.45f, 1f, 0.7f));
             }
             VehicleInteraction car = session.ReservedCar;
             if (car != null)
             {
                 Color conditionColor = Color.Lerp(new Color(1f, 0.35f, 0.25f), new Color(0.45f, 1f, 0.7f), car.Condition);
                 string speed = activeVehicle != null ? $"{Mathf.RoundToInt(Mathf.Abs(activeVehicle.Speed) * 2.237f)} MPH   |   " : "";
-                Panel(new Rect(12, headerBottom + 4, width, 58),
+                Panel(new Rect(12, headerBottom + 4, width, 48),
                     $"{speed}CONDITION {car.Condition:P0}   |   SALE ${car.SalePrice:N0}", narrow ? 18 : 22, conditionColor);
-                headerBottom += 66f;
+                headerBottom += 56f;
             }
-            Panel(new Rect(12, Screen.height - 82, width, 70), session.Prompt, 23, Color.white);
+            Panel(new Rect(12, Screen.height - 70, width, 54), session.Prompt, 20, Color.white);
             if (!string.IsNullOrEmpty(session.Notification))
-                Panel(new Rect(12, Screen.height - 154, width, 64), session.Notification, 21, new Color(1f, 0.83f, 0.3f));
+                Panel(new Rect(12, Screen.height - 128, width, 48), session.Notification, 18, new Color(1f, 0.83f, 0.3f));
 
             if (!string.IsNullOrEmpty(session.Notification)) return;
             Transform buyer = session.Delivery.VisibleBuyer;
@@ -123,7 +128,7 @@ namespace ValetGetaway
             float y = visible ? Mathf.Clamp(Screen.height - point.y, top + 6, Mathf.Max(top + 6, Screen.height - 218)) : top + 6;
             Vector3 local = camera.transform.InverseTransformPoint(destination);
             string direction = visible ? "" : local.z < 0 && Mathf.Abs(local.x) < Mathf.Abs(local.z) * 0.4f ? "  Behind" : local.x < 0 ? "  < Left" : "  Right >";
-            Panel(new Rect(x, y, width, 52), $"{name}  {metres} m{direction}", 23, color);
+            Panel(new Rect(x, y, width, 44), $"{name}  {metres} m{direction}", 19, color);
         }
     }
 }

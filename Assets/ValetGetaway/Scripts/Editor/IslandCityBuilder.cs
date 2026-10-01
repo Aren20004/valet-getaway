@@ -20,6 +20,7 @@ namespace ValetGetaway.Editor
         static readonly List<List<Vector2>> paths = new List<List<Vector2>>();
         static readonly List<float> widths = new List<float>();
         static readonly List<Rect> lots = new List<Rect>();
+        static readonly List<IslandRoadJunctions.Surface> roadSurfaces = new List<IslandRoadJunctions.Surface>();
         static Transform roads, buildings, terrain, props;
         static Material grass, sand, water, stone, roof, glass, gold;
         static Material[] districts;
@@ -42,12 +43,23 @@ namespace ValetGetaway.Editor
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Leave Play mode before building.");
             if (!Directory.Exists(Pack)) throw new InvalidOperationException("Import Broken Vector Low Poly Road Pack first.");
             // Never overwrite an unsaved scene or silently replace a previously edited layout.
-            if (File.Exists(ScenePath)) { Directory.CreateDirectory("Logs/SceneBackups"); File.Copy(ScenePath,"Logs/SceneBackups/ValetIslandCity_"+DateTime.Now.ToString("yyyyMMdd_HHmmss")+".unity",true); }
             foreach (var s in GetLoadedScenes()) if (s.isDirty) throw new InvalidOperationException("Save open scene changes before building the island layout.");
+            if (File.Exists(ScenePath))
+            {
+                string backup="Logs/SceneBackups/IslandCity_"+DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
+                Directory.CreateDirectory(backup);
+                File.Copy(ScenePath,backup+"/ValetIslandCity.unity");
+                // Meshes are persistent assets reused by the scene; a scene-only backup is insufficient.
+                foreach(string source in Directory.GetFiles(Generated,"*",SearchOption.AllDirectories))
+                {
+                    string destination=backup+"/IslandCity/"+source.Substring(Generated.Length+1);
+                    Directory.CreateDirectory(Path.GetDirectoryName(destination)); File.Copy(source,destination);
+                }
+            }
             Directory.CreateDirectory(Generated+"/Meshes"); Directory.CreateDirectory(Generated+"/Materials"); Directory.CreateDirectory("Assets/Scenes");
             AssetDatabase.Refresh();
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
-            paths.Clear(); widths.Clear(); lots.Clear(); converted.Clear(); meshIndex=0;
+            paths.Clear(); widths.Clear(); lots.Clear(); converted.Clear(); roadSurfaces.Clear(); meshIndex=0;
             roads=Group("02 Roads - traced from reference"); buildings=Group("03 Buildings - coordinated districts"); terrain=Group("01 Islands and water"); props=Group("04 Trees and waterfront");
             grass=Mat("Island meadow",new Color(.46f,.59f,.26f)); sand=Mat("Warm shoreline",new Color(.72f,.65f,.43f)); water=Mat("Harbour blue",new Color(.13f,.26f,.39f));
             stone=Mat("Pale pavement",new Color(.64f,.66f,.60f)); roof=Mat("Ivory roofs",new Color(.83f,.85f,.78f)); glass=Mat("Blue glass",new Color(.15f,.31f,.39f)); gold=Mat("Hotel sandstone",new Color(.73f,.55f,.31f));
@@ -90,10 +102,11 @@ namespace ValetGetaway.Editor
             HomesAlong(paths[2],12); HomesAlong(paths[3],18); HomesAlong(paths[4],18); HomesAlong(paths[5],14); HomesAlong(paths[7],14);
             Parking(new Vector2(513,350),45,66,props);
             Hotel();
+            IslandRoadJunctions.Trim(roadSurfaces);
             Trees();
             LightAndCamera();
             AssetDatabase.SaveAssets(); EditorSceneManager.SaveScene(scene,ScenePath);
-            Validate(); Capture(); ValidateSaved();
+            Validate(); ValidateSaved(); Capture();
             Debug.Log("VALET ISLAND BUILD PASSED: saved editable roads, city island, hotel island, bridge, coordinated buildings. Scene: "+ScenePath);
         }
 
@@ -104,7 +117,7 @@ namespace ValetGetaway.Editor
             string path=Generated+"/Materials/"+name+".mat";
             var m=AssetDatabase.LoadAssetAtPath<Material>(path);
             if(m==null) { m=new Material(Shader.Find("Universal Render Pipeline/Lit")); AssetDatabase.CreateAsset(m,path); }
-            m.color=color; m.SetFloat("_Smoothness",.12f); EditorUtility.SetDirty(m); return m;
+            m.color=color; m.SetTexture("_BaseMap",null); m.SetFloat("_Smoothness",.12f); EditorUtility.SetDirty(m); return m;
         }
         static Material Convert(Material source)
         {
@@ -163,31 +176,60 @@ namespace ValetGetaway.Editor
             float[] distances=new float[line.Count]; for(int i=1;i<line.Count;i++) distances[i]=distances[i-1]+Vector2.Distance(line[i-1],line[i]);
             int tiles=Mathf.CeilToInt(distances[distances.Length-1]/5f);
             var verts=new List<Vector3>(); var uv=new List<Vector2>(); var tris=new List<int>();
+            var curbTriangles=new List<bool>();
+            var triangleSegments=new List<int>();
             var sv=source.vertices; var su=source.uv; var st=source.triangles;
+            var centers=new Vector2[tiles+1]; var normals=new Vector2[tiles+1];
+            for(int tile=0;tile<=tiles;tile++)
+            {
+                float distance=(float)tile*distances[distances.Length-1]/tiles;
+                int k=Array.BinarySearch(distances,distance); if(k<0) k=~k; k=Mathf.Clamp(k,1,line.Count-1);
+                float blend=Mathf.InverseLerp(distances[k-1],distances[k],distance);
+                centers[tile]=Vector2.Lerp(line[k-1],line[k],blend);
+                var before=(line[k]-line[Mathf.Max(0,k-2)]).normalized;
+                var after=(line[Mathf.Min(line.Count-1,k+1)]-line[k-1]).normalized;
+                var tangent=Vector2.Lerp(before,after,blend).normalized;
+                normals[tile]=new Vector2(-tangent.y,tangent.x);
+            }
             for(int tile=0;tile<tiles;tile++)
             {
                 int offset=verts.Count;
                 for(int i=0;i<sv.Length;i++)
                 {
                     float t=(sv[i].z-bounds.min.z)/bounds.size.z;
-                    float distance=(tile+t)*distances[distances.Length-1]/tiles;
-                    int k=Array.BinarySearch(distances,distance); if(k<0) k=~k; k=Mathf.Clamp(k,1,line.Count-1);
-                    Vector2 tangent=(line[k]-line[k-1]).normalized;
-                    Vector2 point=Vector2.Lerp(line[k-1],line[k],Mathf.InverseLerp(distances[k-1],distances[k],distance));
-                    point+=new Vector2(-tangent.y,tangent.x)*((sv[i].x-bounds.center.x)/bounds.size.x*width);
-                    verts.Add(W(point,.22f+(sv[i].y-bounds.max.y)*.35f)); uv.Add(su[i]);
+                    Vector2 point=Vector2.Lerp(centers[tile],centers[tile+1],t);
+                    point+=Vector2.Lerp(normals[tile],normals[tile+1],t)*((sv[i].x-bounds.center.x)/bounds.size.x*width);
+                    verts.Add(W(point,.22f+sv[i].y*.35f)); uv.Add(su[i]);
                 }
-                foreach(int t in st) tris.Add(offset+t);
+                for(int t=0;t<st.Length;t+=3)
+                {
+                    if(Mathf.Min(sv[st[t]].y,Mathf.Min(sv[st[t+1]].y,sv[st[t+2]].y))<-.01f) continue;
+                    for(int k=0;k<3;k++) tris.Add(offset+st[t+k]);
+                    curbTriangles.Add(Mathf.Max(sv[st[t]].y,Mathf.Max(sv[st[t+1]].y,sv[st[t+2]].y))>.01f);
+                    triangleSegments.Add(tile);
+                }
             }
-            MeshObject(name+" [Broken Vector road mesh]",verts.ToArray(),tris.ToArray(),uv.ToArray(),new[]{Convert(prefab.GetComponent<Renderer>().sharedMaterial)},roads);
+            var road=MeshObject(name+" [Broken Vector road mesh]",verts.ToArray(),tris.ToArray(),uv.ToArray(),new[]{Convert(prefab.GetComponent<Renderer>().sharedMaterial)},roads);
+            var surface=new IslandRoadJunctions.Surface { Mesh=road.GetComponent<MeshFilter>().sharedMesh,Collider=road.GetComponent<MeshCollider>(),CurbTriangles=curbTriangles.ToArray(),TriangleSegments=triangleSegments.ToArray() };
+            for(int i=0;i<tiles;i++)
+            {
+                Vector3 a=W(centers[i]),b=W(centers[i+1]);
+                var na=new Vector2(normals[i].x,-normals[i].y); var nb=new Vector2(normals[i+1].x,-normals[i+1].y);
+                surface.Full.Add(new IslandRoadJunctions.Quad(new Vector2(a.x,a.z),new Vector2(b.x,b.z),na,nb,width*.5f));
+                surface.Asphalt.Add(new IslandRoadJunctions.Quad(new Vector2(a.x,a.z),new Vector2(b.x,b.z),na,nb,width*.4f));
+            }
+            roadSurfaces.Add(surface);
         }
         static void Bridge()
         {
-            Road("Bridge carriageway",18,Points(650,247,770,247));
+            paths.Add(Smooth(Points(650,247,770,247))); widths.Add(18.75f);
             var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(Pack+"Prefabs/Highway Bridge 2.prefab");
             var o=(GameObject)PrefabUtility.InstantiatePrefab(prefab); o.name="05 Hotel bridge - Broken Vector truss";
             var mesh=Object.Instantiate(o.GetComponent<MeshFilter>().sharedMesh); var b=mesh.bounds; var v=mesh.vertices;
-            for(int i=0;i<v.Length;i++) v[i]=W(new Vector2(Mathf.Lerp(650,770,(v[i].z-b.min.z)/b.size.z),247+(v[i].x-b.center.x)/b.size.x*22),.22f+(v[i].y-7.5f));
+            float scale=120/b.size.x;
+            // This asset spans local X, with its road surface at local Y=7.5.
+            // Uniform scaling preserves the truss and leaves the original deck as the sole driving surface.
+            for(int i=0;i<v.Length;i++) v[i]=W(new Vector2(650,247),.22f)+new Vector3((v[i].x-b.min.x)*scale,(v[i].y-7.5f)*scale,(v[i].z-6.25f)*scale);
             mesh.vertices=v; mesh.RecalculateNormals(); mesh.RecalculateBounds(); mesh.name="Hotel bridge adapted span";
             AssetDatabase.CreateAsset(mesh,Generated+"/Meshes/HotelBridge.asset");
             o.GetComponent<MeshFilter>().sharedMesh=mesh; o.GetComponent<MeshCollider>().sharedMesh=mesh;
@@ -199,19 +241,26 @@ namespace ValetGetaway.Editor
             var group=new GameObject("Building "+lots.Count+" - "+(district==0?"residential":district==1?"commercial":"downtown")).transform; group.SetParent(buildings);
             Box("Footprint",new Vector2(x,y),new Vector3(width+3,.25f,depth+3),0,stone,group);
             Box("Facade",new Vector2(x,y),new Vector3(width,height,depth),.25f,districts[district],group);
-            if(district==0 && width<16 && depth<18)
-            {
-                float h=height+.25f;
-                MeshObject("Pitched ivory roof",new[]{W(new Vector2(x-width/2-.4f,y-depth/2-.4f),h),W(new Vector2(x+width/2+.4f,y-depth/2-.4f),h),W(new Vector2(x+width/2+.4f,y+depth/2+.4f),h),W(new Vector2(x-width/2-.4f,y+depth/2+.4f),h),W(new Vector2(x-width/2-.4f,y),h+3),W(new Vector2(x+width/2+.4f,y),h+3)},new[]{0,1,5,0,5,4,4,5,2,4,2,3,0,4,3,1,2,5},null,new[]{roof},group);
-            }
-            else Box("Ivory roof",new Vector2(x,y),new Vector3(width+.7f,.6f,depth+.7f),height+.25f,roof,group);
-            // Repeated window bands make the scale readable from street level.
-            for(float floor=3;floor<height-1;floor+=4)
-            {
-                Box("South windows",new Vector2(x,y+depth/2+.02f),new Vector3(width*.78f,1.6f,.08f),floor,glass,group,false);
-                Box("North windows",new Vector2(x,y-depth/2-.02f),new Vector3(width*.78f,1.6f,.08f),floor,glass,group,false);
-            }
+            string label=district==0 ? (width<16 ? "HOUSE" : "APARTMENTS") : district==1 ? "SHOP" : "OFFICE";
+            group.name="Building "+lots.Count+" - "+label;
+            BuildingLabels(label,new Vector2(x,y),width,depth,height+.25f,group);
             group.RotateAround(W(new Vector2(x,y)),Vector3.up,rotation);
+        }
+        static void Label(string text,Vector3 position,Quaternion rotation,float maxWidth,Transform parent)
+        {
+            var obj=new GameObject("Label - "+text); obj.transform.SetParent(parent); obj.transform.SetPositionAndRotation(position,rotation);
+            var label=obj.AddComponent<TextMesh>(); label.text=text; label.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            label.fontSize=96; label.characterSize=1; label.anchor=TextAnchor.MiddleCenter; label.alignment=TextAlignment.Center; label.color=new Color(.10f,.16f,.20f);
+            var renderer=obj.GetComponent<MeshRenderer>(); renderer.sharedMaterial=label.font.material; renderer.shadowCastingMode=ShadowCastingMode.Off; renderer.receiveShadows=false;
+            float localWidth=renderer.localBounds.size.x;
+            if(localWidth>.001f) obj.transform.localScale=Vector3.one*Mathf.Min(maxWidth/localWidth,3f);
+            obj.AddComponent<BuildingLabel>().Configure(AssetDatabase.LoadAssetAtPath<Shader>("Assets/ValetGetaway/Shaders/BuildingLabel.shader"));
+        }
+        static void BuildingLabels(string text,Vector2 p,float width,float depth,float top,Transform parent)
+        {
+            Label(text,W(p,top+.08f),Quaternion.Euler(90,0,0),width*.86f,parent);
+            Label(text,W(p+new Vector2(0,depth/2+.06f),top*.65f),Quaternion.identity,width*.85f,parent);
+            Label(text,W(p-new Vector2(0,depth/2+.06f),top*.65f),Quaternion.Euler(0,180,0),width*.85f,parent);
         }
         static bool Clear(Vector2 p,float radius)
         {
@@ -253,11 +302,9 @@ namespace ValetGetaway.Editor
             Box("Hotel main wing",new Vector2(924,160),new Vector3(103,31,43),1,gold,hotel);
             Box("Hotel west wing",new Vector2(866,175),new Vector3(23,24,59),1,gold,hotel);
             Box("Hotel east wing",new Vector2(982,175),new Vector3(23,24,59),1,gold,hotel);
-            Box("Main roof",new Vector2(924,160),new Vector3(106,1,46),32,roof,hotel);
-            for(int side=-1;side<=1;side+=2) Box("Wing roof",new Vector2(924+side*58,175),new Vector3(25,1,61),25,roof,hotel);
-            for(int floor=0;floor<7;floor++) for(int column=0;column<15;column++)
-                Box("Hotel window",new Vector2(878+column*6.6f,181.55f),new Vector3(3.8f,2.2f,.1f),3+floor*4,glass,hotel,false);
-            Box("Lobby glazing",new Vector2(924,183),new Vector3(21,5,.4f),1,glass,hotel);
+            BuildingLabels("HOTEL",new Vector2(924,160),103,43,32,hotel);
+            BuildingLabels("HOTEL",new Vector2(866,175),23,59,25,hotel);
+            BuildingLabels("HOTEL",new Vector2(982,175),23,59,25,hotel);
             Box("Entrance canopy",new Vector2(924,193),new Vector3(32,1,23),7,roof,hotel);
             foreach(float x in new[]{911f,937f}) Box("Canopy pillar",new Vector2(x,201),new Vector3(.8f,7,.8f),0,gold,hotel);
             Box("Entrance walk",new Vector2(924,207),new Vector3(32,.2f,14),.1f,stone,hotel);
@@ -296,7 +343,7 @@ namespace ValetGetaway.Editor
         public static void Validate()
         {
             var missing=0; var meshCount=0;
-            foreach(var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None)) { meshCount++; foreach(var m in r.sharedMaterials) if(m==null || m.shader==null) missing++; }
+            foreach(var r in Object.FindObjectsByType<MeshRenderer>()) { meshCount++; foreach(var m in r.sharedMaterials) if(m==null || m.shader==null) missing++; }
             if(missing>0 || meshCount<100 || GameObject.Find("05 Hotel bridge - Broken Vector truss")==null) throw new InvalidOperationException("Island content validation failed");
             File.WriteAllText("Logs/IslandValidation.txt","Saved scene: "+ScenePath+"\nMesh renderers: "+meshCount+"\nMissing materials: "+missing+"\nRoad routes: "+paths.Count+"\nBuildings: "+lots.Count+"\nVisual-layout scene only; hotel gameplay migration remains separate.\n");
         }
@@ -304,20 +351,54 @@ namespace ValetGetaway.Editor
         {
             EditorSceneManager.OpenScene(ScenePath);
             int meshes=0;
-            foreach(var filter in Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None))
+            foreach(var filter in Object.FindObjectsByType<MeshFilter>())
             {
                 if(filter.sharedMesh==null || string.IsNullOrEmpty(AssetDatabase.GetAssetPath(filter.sharedMesh))) throw new InvalidOperationException("Unsaved or missing mesh on "+filter.name);
                 meshes++;
             }
             Physics.SyncTransforms();
-            for(float x=652;x<770;x+=5)
+            int bridgeSamples=0;
+            for(float x=651;x<770;x+=2)
             {
-                bool deck=false;
-                foreach(var hit in Physics.RaycastAll(W(new Vector2(x,247),50),Vector3.down,100))
-                    if(hit.collider.name.StartsWith("Bridge carriageway") && Mathf.Abs(hit.point.y-.22f)<.5f) deck=true;
-                if(!deck) throw new InvalidOperationException("Missing bridge deck collider at "+x);
+                foreach(float lane in new[] { -4f,0f,4f })
+                {
+                    bool deck=false;
+                    foreach(var hit in Physics.RaycastAll(W(new Vector2(x,247+lane),2),Vector3.down,4))
+                        if(hit.collider.name=="05 Hotel bridge - Broken Vector truss" && Mathf.Abs(hit.point.y-.22f)<.02f) deck=true;
+                    if(!deck) throw new InvalidOperationException("Missing bridge deck collider at "+x+", lane "+lane);
+                    foreach(var collider in Physics.OverlapBox(W(new Vector2(x,247+lane),1.7f),new Vector3(.85f,1.2f,.85f)))
+                        if(collider.name=="05 Hotel bridge - Broken Vector truss") throw new InvalidOperationException("Bridge frame blocks vehicle clearance at "+x+", lane "+lane);
+                    bridgeSamples++;
+                }
             }
-            Debug.Log("VALET ISLAND SAVED-SCENE VALIDATION PASSED: "+meshes+" persistent meshes; continuous bridge carriageway collision.");
+            int roadSamples=0;
+            for(int route=0;route<paths.Count;route++)
+            {
+                var line=paths[route];
+                for(int i=1;i<line.Count-1;i+=2)
+                {
+                    var tangent=(line[i+1]-line[i-1]).normalized;
+                    foreach(float lane in new[] { -.25f,0,.25f })
+                    {
+                        var point=line[i]+new Vector2(-tangent.y,tangent.x)*widths[route]*lane;
+                        bool driveable=false;
+                        foreach(var hit in Physics.RaycastAll(W(point,1),Vector3.down,2))
+                        {
+                            if(!hit.collider.name.Contains("Broken Vector")) continue;
+                            if(hit.point.y>.24f) throw new InvalidOperationException("Sidewalk crosses driving lane at "+point+" on "+hit.collider.name);
+                            if(Mathf.Abs(hit.point.y-.22f)<.02f) driveable=true;
+                        }
+                        if(!driveable) throw new InvalidOperationException("Road collider gap at "+point);
+                        roadSamples++;
+                    }
+                }
+            }
+            int labelCount=Object.FindObjectsByType<TextMesh>().Length;
+            if(labelCount<(lots.Count+3)*3) throw new InvalidOperationException("Missing building labels");
+            foreach(var r in GameObject.Find("03 Buildings - coordinated districts").GetComponentsInChildren<MeshRenderer>())
+                if(r.GetComponent<TextMesh>()==null && r.sharedMaterial.GetTexture("_BaseMap")!=null) throw new InvalidOperationException("Textured building: "+r.name);
+            string result="VALET ISLAND SAVED-SCENE VALIDATION PASSED: "+meshes+" persistent meshes; "+bridgeSamples+" bridge deck/vehicle-clearance samples; "+roadSamples+" clear driving-lane samples; "+labelCount+" building labels.";
+            File.AppendAllText("Logs/IslandValidation.txt",result+"\n"); Debug.Log(result);
         }
         public static void Capture()
         {
@@ -327,6 +408,10 @@ namespace ValetGetaway.Editor
             Render(camera,"Logs/Previews/IslandCityReferenceView.png",1200,900);
             camera.transform.position=W(new Vector2(1000,480),180); camera.transform.LookAt(W(new Vector2(910,210),6)); camera.orthographicSize=145;
             Render(camera,"Logs/Previews/HotelIsland.png",1400,900);
+            camera.transform.position=W(new Vector2(735,335),68); camera.transform.LookAt(W(new Vector2(710,247),3)); camera.orthographicSize=65;
+            Render(camera,"Logs/Previews/BridgeDetail.png",1400,900);
+            camera.transform.SetPositionAndRotation(W(new Vector2(300,302),95),Quaternion.Euler(90,0,0)); camera.orthographicSize=85;
+            Render(camera,"Logs/Previews/JunctionDetail.png",1400,900);
         }
         static void Render(Camera camera,string path,int w,int h)
         {

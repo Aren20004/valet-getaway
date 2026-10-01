@@ -1,5 +1,40 @@
 # Desktop Handoff
 
+## Road, Bridge, and Building Fixes - October 1, 2026
+
+Last night's work was committed and pushed first as `1443d4d` on `main` at
+https://github.com/Aren20004/valet-getaway. This project folder now has the repository's
+Git history and origin configured; future commits can be made directly here.
+
+The updated scene is still **Assets/Scenes/ValetIslandCity.unity**. Open it from
+**Valet Getaway > Open Island City** in Unity Editor. The original ValetTestCity
+gameplay scene remains separate; the island map is still a visual layout.
+
+- Trimmed sidewalk and asphalt meshes at road intersections, forks, and the hotel
+  loop's self-intersection. Overlapping surfaces have a single owner while retaining
+  the imported Broken Vector road mesh and texture atlas.
+- Corrected the bridge to span its actual local X axis with uniform scaling. Its
+  original deck is the driving surface; the duplicate carriageway was removed.
+- Replaced roof/window building details with plain colored boxes: sage houses and
+  apartments, blue shops, cream offices, and a sandstone hotel. Each building has
+  roof and front/back labels. The label shader respects depth and backface culling.
+- Added IslandRoadJunctions.cs, BuildingLabel.cs, and BuildingLabel.shader. All
+  geometry remains saved, editable scene objects; label materials bind the font
+  atlas when scenes load in the editor or at runtime.
+- Builder backups now include the generated meshes/materials as well as the scene.
+  The pre-fix local backup is Logs/SceneBackups/IslandCity_20261001_before_fixes.
+
+Fresh Unity 6000.6.3f1 build and saved-scene checks passed in the validation copy:
+393 persistent meshes, zero missing materials before save, 279 building labels,
+4,098 clear driving-lane raycasts, and 180 bridge deck/vehicle-clearance checks.
+Rendered previews after reopening the saved scene were inspected, including hotel,
+bridge, intersections, and the city overview. The copied scene's SHA-256 matches the
+validated file. Results and previews are under Logs/IslandValidation.txt and
+Logs/Previews. No manual driving test or gameplay migration was performed.
+
+Lane markings at junctions remain a visual polish opportunity. Any future gameplay
+migration must address hard-coded hotel/guest/validation coordinates first.
+
 ## Island City Layout - September 30, 2026
 
 User requested a large city island, a bridge to a hotel island, and street shapes based on SourceAssets/Design/IslandCityReference.png, using Broken Vector Low Poly Road Pack (asset 67288). The user imported the pack into Assets/BrokenVector/LowPolyRoadPack.

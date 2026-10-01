@@ -15,6 +15,10 @@ computer; it records the last verified state and unfinished work.
   Assets/BrokenVector/LowPolyRoadPack. Preserve all asset licenses.
 - New visual layout: Assets/Scenes/ValetIslandCity.unity. It is not yet a gameplay
   replacement for ValetTestCity; see the latest HANDOFF.md entry.
+- Island buildings should remain plain district-colored boxes with purpose labels;
+  do not add building textures, windows, or detailed roofs without a new request.
+- IslandRoadJunctions trims intersecting sidewalks. The imported bridge spans local
+  X, not local Z; preserve its proportions and do not add a duplicate road deck.
 - Buyers wander, remain undisclosed until seen, and then receive directions. A sale
   requires a stopped car nearby and an on-foot conversation; retain these conditions.
 - Do not claim gameplay validation passed without a fresh Console result. The

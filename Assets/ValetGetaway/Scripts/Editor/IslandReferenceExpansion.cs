@@ -23,13 +23,18 @@ namespace ValetGetaway.Editor
             B.Road("West downtown connection",16,Path(155,338,176,382,246,386,341,386,394,403,432,412));
             B.Road("Western lower district",14,Path(195,383,195,468,214,507,291,520,323,561,330,597,370,616,409,644,453,650,565,651));
             B.Road("Warehouse block east",12,Path(299,520,324,516,324,477,324,444,246,410,244,339));
-            B.Road("Western hill road",12,Path(439,650,439,685,402,700,304,700,263,711,248,738,255,768,284,792,321,805,364,808,404,822,440,853,449,882));
-            B.Road("South city connector",14,Path(565,731,494,733,431,735,389,743,365,764,364,808));
+            AddWaterfrontRoads();
             B.Road("Southern shore road",12,Path(449,882,488,879,530,854,564,823,600,811,632,794,653,773,638,752,603,742,565,731));
             B.Road("Southeast residential circuit",11,Path(565,731,612,724,659,701,703,690,749,706,805,696,853,670,868,645,846,620,819,619,800,638,789,674,789,720));
             B.Road("North hillside houses",10,Path(650,267,668,228,683,199,689,173,673,155,674,137));
             B.Road("North hillside outer loop",10,Path(689,173,722,180,751,201,781,224,797,254,806,279,829,292));
-            B.Road("Marina quay",9,Path(284,792,289,838,323,855,382,858,393,904,438,909,449,882));
+        }
+        internal static void AddWaterfrontRoads()
+        {
+            // Keep the carriageways inland of the marina, leaving the piers pedestrian-only.
+            B.Road("Western hill road",12,Path(439,650,439,685,402,700,304,700,263,711,260,735,275,751,308,769,343,788,388,808,434,842,449,882));
+            B.Road("South city connector",14,Path(565,731,494,733,431,735,403,752,397,777,388,808));
+            B.Road("Marina quay",9,Path(388,808,423,813,447,834,467,856,475,886,462,906,438,909,420,891,419,869));
         }
         static void Block(float x,float y,float width,float depth,float height,int district)
         { var p=P(x,y); B.Lot(p.x,p.y,width,depth,height,district); }

@@ -179,7 +179,7 @@ namespace ValetGetaway.Editor
         internal static GameObject MeshObject(string name,Vector3[] vertices,int[] triangles,Vector2[] uv,Material[] mats,Transform parent)
         {
             var mesh=new Mesh { name=name, indexFormat=IndexFormat.UInt32 }; mesh.vertices=vertices; mesh.triangles=triangles; if(uv!=null) mesh.uv=uv; mesh.RecalculateNormals(); mesh.RecalculateBounds();
-            AssetDatabase.CreateAsset(mesh,Generated+"/Meshes/"+(meshIndex++).ToString("D4")+".asset");
+            AssetDatabase.CreateAsset(mesh,AssetDatabase.GenerateUniqueAssetPath(Generated+"/Meshes/"+(meshIndex++).ToString("D4")+".asset"));
             var o=new GameObject(name,typeof(MeshFilter),typeof(MeshRenderer),typeof(MeshCollider)); o.transform.SetParent(parent);
             o.GetComponent<MeshFilter>().sharedMesh=mesh; o.GetComponent<MeshRenderer>().sharedMaterials=mats; o.GetComponent<MeshCollider>().sharedMesh=mesh; return o;
         }
@@ -390,6 +390,7 @@ namespace ValetGetaway.Editor
             foreach(float x in new[]{911f,937f}) Box("Canopy pillar",new Vector2(x,201),new Vector3(.8f,7,.8f),0,gold,hotel);
             Box("Entrance walk",new Vector2(924,207),new Vector3(32,.2f,14),.1f,stone,hotel);
             Parking(new Vector2(1037,371),82,58,hotel);
+            PoliceStation(hotel);
             Road("Hotel parking entrance",10,Points(1037,334,1037,348));
             Box("Valet pull-off apron",new Vector2(918,214),new Vector3(76,.18f,12),.08f,Mat("Parking asphalt",new Color(.22f,.25f,.26f)),hotel);
             Box("Hotel entry exit divider",new Vector2(844,247),new Vector3(10,.2f,1.5f),.22f,stone,hotel);
@@ -406,6 +407,71 @@ namespace ValetGetaway.Editor
                 var crown=GameObject.CreatePrimitive(PrimitiveType.Sphere); crown.name="Hotel garden tree"; crown.transform.SetParent(hotel); crown.transform.position=W(p,5); crown.transform.localScale=new Vector3(7,9,7); crown.GetComponent<Renderer>().sharedMaterial=landscape; Object.DestroyImmediate(crown.GetComponent<Collider>());
             }
         }
+        static void PoliceStation(Transform hotel)
+        {
+            if(hotel.Find("Police station - placeholder")!=null) return;
+            var group=new GameObject("Police station - placeholder").transform;
+            group.SetParent(hotel);
+            Undo.RegisterCreatedObjectUndo(group.gameObject,"Add police station");
+            var position=new Vector2(958,374);
+            Box("Police station foundation",position,new Vector3(56,.3f,42),0,stone,group);
+            Box("Police station block",position,new Vector3(52,18,38),.3f,Mat("Police station blue",new Color(.27f,.43f,.58f)),group);
+            Box("Police station roof",position,new Vector3(53,.4f,39),18.3f,roof,group);
+            Box("Walk to hotel parking",new Vector2(990,374),new Vector3(12,.2f,8),.05f,stone,group);
+            BuildingLabels("POLICE",position,52,38,18.7f,group);
+        }
+
+        [MenuItem("Valet Getaway/Add Police Station and Fix Marina Road")]
+        public static void ApplyPoliceAndMarinaFix()
+        {
+            var scene=SceneManager.GetActiveScene();
+            if(scene.path!=ScenePath || EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new InvalidOperationException("Open ValetIslandCity in Edit mode first.");
+            var hotel=GameObject.Find("06 Hotel island - arrival precinct");
+            var roadRoot=GameObject.Find("02 Roads - traced from reference");
+            if(hotel==null || roadRoot==null) throw new InvalidOperationException("Island scene roots were not found.");
+            string[] names={"Western hill road","South city connector","Marina quay"};
+            var originals=new List<GameObject>();
+            foreach(var name in names)
+            {
+                var old=roadRoot.transform.Find(name+" [Broken Vector road mesh]");
+                if(old==null) throw new InvalidOperationException("Missing road: "+name);
+                originals.Add(old.gameObject);
+            }
+            Directory.CreateDirectory("Logs/SceneBackups");
+            EditorSceneManager.SaveScene(scene,"Logs/SceneBackups/BeforePoliceAndMarina_"+DateTime.Now.ToString("yyyyMMdd_HHmmss")+".unity",true);
+            Undo.IncrementCurrentGroup();
+            int undo=Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Police station and inland marina roads");
+            roads=roadRoot.transform;
+            stone=AssetDatabase.LoadAssetAtPath<Material>(Generated+"/Materials/Pale pavement.mat");
+            roof=AssetDatabase.LoadAssetAtPath<Material>(Generated+"/Materials/Ivory roofs.mat");
+            paths.Clear(); widths.Clear(); roadSurfaces.Clear(); converted.Clear();
+            IslandReferenceExpansion.AddWaterfrontRoads();
+            IslandRoadJunctions.Trim(roadSurfaces);
+            foreach(var old in originals) Undo.DestroyObjectImmediate(old);
+            foreach(var surface in roadSurfaces) Undo.RegisterCreatedObjectUndo(surface.Collider.gameObject,"Reroute marina road");
+            PoliceStation(hotel.transform);
+            Physics.SyncTransforms();
+            var ground=GameObject.Find("City island - grass").GetComponent<MeshCollider>();
+            int samples=0,unsupported=0;
+            foreach(var surface in roadSurfaces)
+                foreach(var vertex in surface.Mesh.vertices)
+                {
+                    samples++;
+                    if(!ground.Raycast(new Ray(vertex+Vector3.up*20,Vector3.down),out var hit,25)) unsupported++;
+                }
+            Undo.CollapseUndoOperations(undo);
+            EditorSceneManager.MarkSceneDirty(scene);
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.SaveScene(scene);
+            string report="Police station added west of hotel parking. Marina roads rerouted. Ground checks: "+samples+"; unsupported road vertices: "+unsupported+".";
+            File.WriteAllText("Logs/PoliceAndMarinaFix.txt",report);
+            Debug.Log(report);
+            Selection.activeGameObject=hotel.transform.Find("Police station - placeholder").gameObject;
+            SceneView.RepaintAll();
+        }
+
         static void Trees()
         {
             var leaf=Mat("Foliage olive",new Color(.29f,.41f,.17f)); var trunk=Mat("Tree trunks",new Color(.35f,.30f,.20f));

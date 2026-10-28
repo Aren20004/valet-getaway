@@ -269,9 +269,47 @@ namespace ValetGetaway.Editor
         static void RampSupport(Vector2 p,float deckHeight,Material support,string suffix)
         {
             float bottom=-7.2f;
-            float pierHeight=Mathf.Max(1f,deckHeight-bottom-.65f);
+            float left=.22f+16f*Mathf.Pow((p.x-4.5f-602f)/48f,2f)-.25f;
+            float right=.22f+16f*Mathf.Pow((p.x+4.5f-602f)/48f,2f)-.25f;
+            float baseHeight=left-.7f;
+            float pierHeight=Mathf.Max(1f,baseHeight-bottom);
             Box("Jump ramp support pier "+suffix,p,new Vector3(4.5f,pierHeight,4.5f),bottom,support,props);
-            Box("Jump ramp support cap "+suffix,new Vector2(p.x,p.y),new Vector3(9f,.7f,5.5f),deckHeight-.85f,support,props);
+            var center=W(p);
+            // Follow the deck's rise; the old horizontal cap protruded through its uphill approach.
+            var vertices=new[]{
+                center+new Vector3(-4.5f,baseHeight,-2.75f),center+new Vector3(4.5f,baseHeight,-2.75f),
+                center+new Vector3(4.5f,baseHeight,2.75f),center+new Vector3(-4.5f,baseHeight,2.75f),
+                center+new Vector3(-4.5f,left,-2.75f),center+new Vector3(4.5f,right,-2.75f),
+                center+new Vector3(4.5f,right,2.75f),center+new Vector3(-4.5f,left,2.75f)};
+            MeshObject("Jump ramp support cap "+suffix,vertices,new[]{0,1,2,0,2,3,4,6,5,4,7,6,3,2,6,3,6,7,0,5,1,0,4,5,0,3,7,0,7,4,1,5,6,1,6,2},null,new[]{support},props);
+        }
+
+        [MenuItem("Valet Getaway/Fix Jump Ramp Support Clearance")]
+        public static void FixRampSupportClearance()
+        {
+            var scene=SceneManager.GetActiveScene();
+            if(scene.path!=ScenePath || EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Open the island in Edit mode first.");
+            props=GameObject.Find("04 Trees and waterfront").transform;
+            Directory.CreateDirectory("Logs/SceneBackups");
+            EditorSceneManager.SaveScene(scene,"Logs/SceneBackups/BeforeRampClearance_"+DateTime.Now.ToString("yyyyMMdd_HHmmss")+".unity",true);
+            foreach(var suffix in new[]{"A","B"})
+            {
+                var oldCap=props.Find("Jump ramp support cap "+suffix);
+                var oldPier=props.Find("Jump ramp support pier "+suffix);
+                var material=oldCap.GetComponent<Renderer>().sharedMaterial;
+                Undo.DestroyObjectImmediate(oldCap.gameObject);
+                Undo.DestroyObjectImmediate(oldPier.gameObject);
+                float x=suffix=="A" ? 617f : 637f;
+                RampSupport(new Vector2(x,302),.22f+16f*Mathf.Pow((x-602f)/48f,2f),material,suffix);
+                Undo.RegisterCreatedObjectUndo(props.Find("Jump ramp support cap "+suffix).gameObject,"Correct ramp support clearance");
+                Undo.RegisterCreatedObjectUndo(props.Find("Jump ramp support pier "+suffix).gameObject,"Correct ramp support clearance");
+            }
+            Physics.SyncTransforms();
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            File.WriteAllText("Logs/RampClearanceFix.txt","Replaced horizontal support caps with sloped caps below the ramp surface, and lowered piers to their bases.");
+            Debug.Log("VALET RAMP SUPPORT CLEARANCE FIXED");
         }
         static void DirectionArrow(Vector2 p,float heading)
         {
@@ -419,6 +457,24 @@ namespace ValetGetaway.Editor
             Box("Police station roof",position,new Vector3(53,.4f,39),18.3f,roof,group);
             Box("Walk to hotel parking",new Vector2(990,374),new Vector3(12,.2f,8),.05f,stone,group);
             BuildingLabels("POLICE",position,52,38,18.7f,group);
+        }
+
+        /// <summary>
+        /// Prepare the static road state so a single road can be added outside a full island rebuild, the same way
+        /// ApplyPoliceAndMarinaFix does before it reroutes the marina. Call this, then <see cref="Road"/>.
+        /// </summary>
+        internal static void BeginRoadEdit(Transform roadRoot)
+        {
+            roads=roadRoot;
+            stone=AssetDatabase.LoadAssetAtPath<Material>(Generated+"/Materials/Pale pavement.mat");
+            roof=AssetDatabase.LoadAssetAtPath<Material>(Generated+"/Materials/Ivory roofs.mat");
+            paths.Clear(); widths.Clear(); roadSurfaces.Clear(); converted.Clear();
+        }
+
+        /// <summary>Every road surface created since the last <see cref="BeginRoadEdit"/>, for undo registration and checks.</summary>
+        internal static IEnumerable<GameObject> RoadEditResults()
+        {
+            foreach(var surface in roadSurfaces) if(surface.Collider!=null) yield return surface.Collider.gameObject;
         }
 
         [MenuItem("Valet Getaway/Add Police Station and Fix Marina Road")]

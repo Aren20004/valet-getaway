@@ -18,6 +18,7 @@ namespace ValetGetaway
         private bool awaitingReset;
         private HotelGameSession session;
         private HotelGuestCar guest;
+        private bool policeAlertRaised;
         [Header("Vehicle condition")]
         [SerializeField, Min(0f)] private float harmlessImpactSpeed = 3f;
         [SerializeField, Min(0f)] private float conditionLossPerMetrePerSecond = 0.045f;
@@ -34,9 +35,12 @@ namespace ValetGetaway
             // Measure closing speed into a surface, not sideways speed along it.
             // Ignore upward-facing ground contacts so ordinary road travel is free.
             float impactSpeed = 0f;
+            var motor = GetComponent<VehicleGroundMotor>();
             for (int i = 0; i < collision.contactCount; i++)
             {
-                Vector3 normal = collision.GetContact(i).normal;
+                var contact = collision.GetContact(i);
+                if (motor != null && motor.IsTraversableContact(contact, collision.collider)) continue;
+                Vector3 normal = contact.normal;
                 if (normal.y > 0.65f) continue;
                 impactSpeed = Mathf.Max(impactSpeed, Mathf.Abs(Vector3.Dot(collision.relativeVelocity, normal)));
             }
@@ -56,6 +60,7 @@ namespace ValetGetaway
 
         private void ResetCondition()
         {
+            policeAlertRaised = false;
             condition = 1f;
             nextDamageAt = 0f;
         }
@@ -127,6 +132,11 @@ namespace ValetGetaway
             PrototypeHud.SetVehicle(vehicle, this);
             delivery.AssignBuyer(this);
             if (session != null) session.SetCurrentCar(this);
+            if (!policeAlertRaised && session != null)
+            {
+                policeAlertRaised = true;
+                session.ReportCarTaken(this);
+            }
         }
 
         public void PrepareForGuest()

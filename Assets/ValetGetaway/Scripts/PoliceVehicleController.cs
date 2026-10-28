@@ -192,6 +192,12 @@ namespace ValetGetaway
             policeOfficer.SetActive(false);
 
             // Start police car chase
+            var carBody = policeCarAI.GetComponent<Rigidbody>();
+            if (carBody != null)
+            {
+                carBody.isKinematic = false;
+                carBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            }
             policeCarAI.enabled = true;
 
             Debug.Log("Police officer entered car!");

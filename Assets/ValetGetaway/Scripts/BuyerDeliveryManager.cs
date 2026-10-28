@@ -178,6 +178,20 @@ namespace ValetGetaway
             parkingBoundary.gameObject.SetActive(false);
         }
 
+        /// <summary>Drop the current job without a sale: the player lost the car (busted by the police).</summary>
+        public void Cancel()
+        {
+            if (!HasDelivery) return;
+            buyerRenderers[selectedBuyer].sharedMaterial = idleMaterial;
+            previousBuyer = selectedBuyer;
+            selectedBuyer = -1;
+            BuyerDiscovered = false;
+            assignedCar = null;
+            carBody = null;
+            marker.SetActive(false);
+            parkingBoundary.gameObject.SetActive(false);
+        }
+
         public bool TrySell(VehicleInteraction car)
         {
             if (car != assignedCar || !CanDeliver || !CanTalk || observer.GetComponent<ThirdPersonPlayerController>().IsDriving) return false;

@@ -1,5 +1,123 @@
 # Desktop Handoff
 
+## Station Access and Pursuit Repair - October 27, 2026
+
+The precinct's new parking lot did not match the old dispatch coordinates.
+`StationRoadRepair.Apply` now saves a direct west-side response connection,
+shorter frontage, raised exit barrier, and a blended parking-to-road transition.
+Affected road junction meshes are trimmed with the existing polygon clipping
+utility. Generated roads get drivable collision meshes; bridge railings and
+supports are explicitly excluded. The building and imported source meshes stay
+intact. Fleet and decorative vehicles remain editable within the original lot,
+arranged around one wide central aisle instead of four cramped rows.
+
+Police have saved bay-clearance/aisle/gate waypoints, merge yielding, tighter
+parking turns, corner-speed anticipation, waypoint pass detection, clearer stuck
+recovery, and a short predictive pursuit lead. Outside the gate they can abandon
+the remaining access route when a clear, supported path reaches the player.
+The original officer now releases the patrol Rigidbody from kinematic mode on
+boarding. Departure is counted at the gate, not after the entire connection road.
+The existing `Police Station > Rebuild Approach Roads` command uses this repair.
+
+Fresh Unity 6000.6.3f1 background results: `VALET POLICE DISPATCH VALIDATION PASSED`
+with all ten cars selected, all nine reinforcements exiting, original patrol
+boarding/driving, chase/regroup cycles, physical bridge pursuit, re-entry rules,
+fleet reuse, and sale cancellation. `VALET STATION ROAD VALIDATION PASSED` covers
+four physical crossings (35 m each direction at the entrance, 60 m along the
+frontage junction, and 40 m across the response-link junction). The geometry
+checks isolate traffic and start from a freshly reopened saved scene.
+
+The user requested no screen control. Tests ran in a separate hidden Unity copy
+at `E:/CodexValidation/ValetRoadValidation_20261027`, not in their open editor.
+Only the saved scene, its required new assets, and navigation were copied back
+after checking that the original scene had not changed during testing.
+Evidence is in `Logs/PoliceDispatchValidation.txt`, `Logs/StationRoadValidation.txt`
+and the isolated copy's `Batch7.log` / `RoadChecks.log`. Before-delivery backups
+are in `Logs/SceneBackups/StationRoadDelivery_20261027_224056`.
+The open editor was not focused or reloaded; accept its scene reload when ready.
+Changes are local and not pushed.
+
+## Random Police Response Waves - October 27, 2026
+
+The saved island now has `Police Response Fleet`: nine parked, editable response
+cars plus the original officer/car, for ten police cars total. The response cars
+use `Prefabs/Police/PoliceResponseCar.prefab`, copied from the teammate's police
+vehicle, and the shared curb-capable motor. Parking aisle, station exit, and
+bridge waypoints are editable children of the fleet root.
+
+First entry into each newly available guest car raises `HotelGameSession.CarTaken`.
+`PoliceDispatchDirector` randomly selects a total of five to ten police cars,
+including the original patrol. Reinforcements depart at randomized intervals,
+follow the parking exit, use the bridge route when changing islands, and pursue
+with varied speeds/flanking offsets. Each alternates six-to-twelve-second chase
+bursts and brief independent regroup periods. Exiting pauses reinforcements;
+re-entering the same job resumes the wave instead of adding cars. A fresh guest
+job can trigger another wave. Selling cancels queued dispatch. The fixed fleet
+is reused; offscreen retired cars are returned to their parking spaces.
+
+Fresh Unity result: `VALET POLICE DISPATCH VALIDATION PASSED`. Real car-entry
+runs selected eight and seven cars; all selected extra responders left parking
+and demonstrated chase/regroup/re-engage behavior. The latest run also physically
+followed the player across the hotel bridge into the city. Re-entry suppression,
+fresh-job dispatch, randomized bounds, fleet reuse, and sale cancellation passed.
+The original patrol's foot chase, boarding, ramming, and return to foot pursuit
+also passed its separate regression test. Re-run the fleet test via
+`Valet Getaway > Validate Police Response Waves`; evidence is in
+`Logs/PoliceDispatchValidation.txt` and `Logs/Editor.log`. These changes are local.
+
+## Shared Driving and Curb Handling - October 27, 2026
+
+`ArcadeVehicleController` and `PoliceCarAI` now use `VehicleGroundMotor` for
+ground detection, traction, steering, brakes, speed limits, slope alignment,
+and low curb clearance. Ground probes ignore the vehicle's own hull and other
+rigidbodies. The bumper and current footprint sample the tops of raised road
+meshes, including their open lower edges; clearance sweeps keep walls blocking.
+Five support probes distinguish short curb bevels from continuous slopes.
+Flat-ground contact settling prevents curb impulses from launching the chassis.
+
+Driving now brakes before switching to reverse, limits reverse speed, moderates
+high-speed steering, and preserves airborne momentum without engine thrust in
+midair. Police also reverse briefly if stalled. Low, traversable static curb
+contacts do not reduce sale value; real wall and vehicle impacts still do.
+
+Use `Valet Getaway > Validate Vehicle Driving` on the open island. Its fifteen
+Play mode cases cover player forward/reverse/diagonal curb crossings, police
+curb crossings, wall blocking and damage, braking, airborne momentum, reversing,
+actual island sidewalk/grass transitions, and physical jump-ramp launches for
+both vehicle types. Latest evidence is in `Logs/VehicleDrivingValidation.txt`
+and `Logs/Editor.log`; test tracks and cars exist only during Play mode.
+
+Fresh Unity result: `VALET DRIVING VALIDATION PASSED` for all fifteen cases.
+`VALET ISLAND POLICE VALIDATION PASSED` also passed again with the shared motor,
+including boarding, physical vehicle pursuit/ramming, and resumed foot pursuit.
+Ramp support caps also required repair: their horizontal tops protruded through
+the uphill deck and physically blocked cars. The saved scene and builder now
+use sloped support caps below the deck and shorter piers. A scene backup was
+taken before the repair; new support meshes are persistent assets.
+
+## Police Integration - October 27, 2026
+
+Pulled teammate commit `68deb90`, including `PoliceTest`, `PoliceUnit`, and the
+three police scripts. The open `ValetIslandCity` scene now contains a saved
+`PoliceUnit - Station Patrol` prefab instance in the hotel-island parking lot.
+All three player references point at the island player. Navigation was rebuilt
+for the current station and waterfront layout and saved as
+`Assets/ValetGetaway/IslandCity/IslandPoliceNavigation.asset`.
+
+The scene instance gives the police car comparable mass to the guest cars,
+continuous collision detection, interpolation, and upright rotation constraints.
+`PoliceFootAI` now guards disabled/off-mesh agents; `PoliceCarAI` stops its rigidbody
+when disabled after the player leaves a car. The teammate's test scene is preserved.
+
+Fresh Unity Play mode result: `VALET ISLAND POLICE VALIDATION PASSED` for saved
+references, foot pursuit, walking to the assigned car, boarding, car pursuit,
+a physical collision with a test vehicle, and exiting/resuming foot pursuit.
+Evidence: `Logs/IslandPoliceSetup.txt`, `Logs/IslandPoliceValidation.txt`, and
+`Logs/Editor.log` (ignored local logs). Re-run with
+`Valet Getaway > Validate Island Police` while the island scene is open.
+The car retains the teammate's direct steering pursuit; city-wide obstacle-aware
+vehicle routing was not added or validated. Integration changes are local.
+
 ## Playable Full Island Update - October 1, 2026
 
 The saved scene `Assets/Scenes/ValetIslandCity.unity` now contains the playable

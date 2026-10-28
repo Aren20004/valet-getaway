@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 namespace ValetGetaway
 {
-    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(Rigidbody), typeof(VehicleGroundMotor))]
     public sealed class ArcadeVehicleController : MonoBehaviour
     {
         [SerializeField] private float acceleration = 24f;
@@ -13,110 +13,45 @@ namespace ValetGetaway
         [SerializeField] private float maxSpeed = 24f;
         [SerializeField] private float braking = 8f;
         [SerializeField] private float slopeAlignment = 8f;
-
-        private Rigidbody body;
+        [Tooltip("Full lock per second: how fast the steering rack itself moves.")]
+        [SerializeField, Min(.5f)] private float steerRate = 5f;
+        [Tooltip("The most lateral grip the tyres hold, in m/s^2, before the car starts to slide wide.")]
+        [SerializeField, Min(1f)] private float gripLimit = 13f;
+        VehicleGroundMotor motor;
+        float handbrake;
         public float LastThrottle { get; private set; }
-        public bool Grounded { get; private set; }
-
+        public bool Grounded => motor != null && motor.Grounded;
         public bool HasDriver { get; set; }
-        public float Speed => body == null ? 0f : Vector3.Dot(body.linearVelocity, transform.forward);
+        public float Speed => motor == null ? 0f : motor.Speed;
+        /// <summary>Sideways speed across the tyres, m/s (how hard the car is sliding).</summary>
+        public float Slip => motor == null ? 0f : motor.Slip;
+        public float Handbrake => handbrake;
+        /// <summary>Scales acceleration and top speed; a damaged car limps home on this.</summary>
+        public float PowerScale { get; set; } = 1f;
+        /// <summary>Scales steering authority; drops with damage so a wrecked car wanders.</summary>
+        public float SteeringScale { get; set; } = 1f;
 
-        private void Awake()
+        void Awake()
         {
-            body = GetComponent<Rigidbody>();
-            body.centerOfMass = new Vector3(0f, -0.55f, 0f);
+            motor = GetComponent<VehicleGroundMotor>();
+            if (motor == null) motor = gameObject.AddComponent<VehicleGroundMotor>();
         }
 
-        private void FixedUpdate()
+        void FixedUpdate()
         {
-            if (!HasDriver || Keyboard.current == null)
+            var keyboard = HasDriver ? Keyboard.current : null;
+            LastThrottle = keyboard == null ? 0f : (keyboard.wKey.isPressed ? 1f : 0f) - (keyboard.sKey.isPressed ? 1f : 0f);
+            float turn = keyboard == null ? 0f : (keyboard.dKey.isPressed ? 1f : 0f) - (keyboard.aKey.isPressed ? 1f : 0f);
+            // Space is the handbrake, not a wall: it comes on over a moment and lets the back end come round.
+            bool pulled = keyboard != null && keyboard.spaceKey.isPressed;
+            handbrake = Mathf.MoveTowards(handbrake, pulled ? 1f : 0f, (pulled ? 7f : 5f) * Time.fixedDeltaTime);
+            // S past a standstill is the brake pedal; the motor reads that from the throttle sign itself.
+            motor.Drive(LastThrottle, turn, false, handbrake, new VehicleGroundMotor.Tuning
             {
-                ApplyRollingResistance();
-                return;
-            }
-
-            float throttle = 0f;
-            if (Keyboard.current.wKey.isPressed) throttle += 1f;
-            if (Keyboard.current.sKey.isPressed) throttle -= 1f;
-            LastThrottle=throttle;
-
-            float steerInput = 0f;
-            if (Keyboard.current.dKey.isPressed) steerInput += 1f;
-            if (Keyboard.current.aKey.isPressed) steerInput -= 1f;
-
-            // Probe the center and both axles. Keeping the best hit lets the car
-            // follow the ramp's actual mesh normal instead of staying level.
-            RaycastHit groundHit;
-            bool grounded = TryGroundHit(out groundHit);
-            Grounded=grounded;
-            if (!grounded)
-            {
-                // Keep momentum through jumps so a launch ramp carries the car
-                // over the water instead of freezing it at the lip.
-                if (Mathf.Abs(throttle)>0.01f) body.AddForce(transform.forward*throttle*acceleration*.55f,ForceMode.Acceleration);
-                return;
-            }
-
-            float forwardSpeed = Vector3.Dot(body.linearVelocity, transform.forward);
-            float power = throttle >= 0f ? acceleration : reverseAcceleration;
-            if (Mathf.Abs(forwardSpeed) < maxSpeed || Mathf.Sign(throttle) != Mathf.Sign(forwardSpeed))
-            {
-                body.AddForce(transform.forward * throttle * power, ForceMode.Acceleration);
-            }
-
-            float speedFactor = Mathf.Clamp01(Mathf.Abs(forwardSpeed) / 2f);
-            float direction = Mathf.Abs(forwardSpeed) < 0.25f ? 1f : Mathf.Sign(forwardSpeed);
-            Quaternion steered=body.rotation * Quaternion.Euler(0f, steerInput * steering * speedFactor * direction * Time.fixedDeltaTime, 0f);
-            if (grounded && Vector3.Angle(groundHit.normal, Vector3.up) > 2f)
-            {
-                Vector3 forward=Vector3.ProjectOnPlane(steered*Vector3.forward,groundHit.normal).normalized;
-                if (forward.sqrMagnitude>.01f)
-                {
-                    Quaternion slopeRotation=Quaternion.LookRotation(forward,groundHit.normal);
-                    steered=Quaternion.Slerp(body.rotation,slopeRotation,Mathf.Clamp01(slopeAlignment*Time.fixedDeltaTime));
-                }
-            }
-            body.MoveRotation(steered);
-
-            Vector3 lateralVelocity = transform.right * Vector3.Dot(body.linearVelocity, transform.right);
-            body.AddForce(-lateralVelocity * lateralGrip, ForceMode.Acceleration);
-
-            if (Keyboard.current.spaceKey.isPressed)
-            {
-                body.AddForce(-body.linearVelocity * braking, ForceMode.Acceleration);
-            }
-            else if (Mathf.Approximately(throttle, 0f))
-            {
-                ApplyRollingResistance();
-            }
-        }
-
-        private void ApplyRollingResistance()
-        {
-            if (body == null)
-            {
-                return;
-            }
-
-            Vector3 horizontalVelocity = Vector3.ProjectOnPlane(body.linearVelocity, Vector3.up);
-            body.AddForce(-horizontalVelocity * 0.45f, ForceMode.Acceleration);
-        }
-
-        private bool TryGroundHit(out RaycastHit best)
-        {
-            best=new RaycastHit();
-            float closest=float.MaxValue;
-            Vector3[] probes={
-                transform.position+Vector3.up*.1f,
-                transform.TransformPoint(new Vector3(0,.3f,1.7f)),
-                transform.TransformPoint(new Vector3(0,.3f,-1.7f))
-            };
-            foreach(Vector3 probe in probes)
-            {
-                if (!Physics.Raycast(probe,Vector3.down,out RaycastHit hit,1.8f)) continue;
-                if (hit.distance<closest) { closest=hit.distance; best=hit; }
-            }
-            return closest<float.MaxValue;
+                acceleration = acceleration * PowerScale, reverseAcceleration = reverseAcceleration * PowerScale,
+                steering = steering * SteeringScale, grip = lateralGrip, maxSpeed = maxSpeed * PowerScale,
+                braking = braking, alignment = slopeAlignment, steerRate = steerRate, gripLimit = gripLimit
+            });
         }
     }
 }

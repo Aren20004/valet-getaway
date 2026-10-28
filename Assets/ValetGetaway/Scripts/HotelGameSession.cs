@@ -28,6 +28,8 @@ namespace ValetGetaway
         public string SpeechText { get; private set; }
         public HotelGuestCar[] Guests => guests;
         public HotelBusStop[] BusStops => busStops;
+        public event System.Action<VehicleInteraction> CarTaken;
+        public void ReportCarTaken(VehicleInteraction car) => CarTaken?.Invoke(car);
 
         public void Configure(ThirdPersonPlayerController p, OrbitFollowCamera camera, BuyerDeliveryManager jobs,
             Transform returnPoint, HotelGuestCar[] arrivals, HotelBusStop[] stops)
@@ -82,6 +84,28 @@ namespace ValetGetaway
             if (ReservedCar != null && ReservedCar.CanEnter) ReservedCar.EnterVehicle();
         }
 
+        /// <summary>The police got the car: the job is gone, the car goes back, and the player wakes up at the hotel.</summary>
+        public void Busted(VehicleInteraction car)
+        {
+            if (car == null) car = currentCar;
+            if (car != null)
+            {
+                car.ExitVehicle();
+                car.ResetAfterDelivery();
+            }
+            delivery.Cancel();
+            ReservedCar = null;
+            currentCar = null;
+            player.TeleportTo(hotelReturn.position, hotelReturn.rotation);
+            followCamera.SetTarget(player.transform, true);
+            BustCount++;
+            Busts?.Invoke();
+        }
+
+        /// <summary>How many runs the police have ended.</summary>
+        public int BustCount { get; private set; }
+        public event System.Action Busts;
+
         public bool TakeBus()
         {
             if (player.IsDriving || NearbyBus() == null || Time.time < busReadyAt) return false;
@@ -117,7 +141,7 @@ namespace ValetGetaway
             get
             {
                 if (player.IsDriving) return delivery.BuyerDiscovered && delivery.CanDeliver
-                    ? "E  Exit and speak to buyer" : "WASD  Drive   |   SPACE  Brake   |   E  Exit"+(islandControls ? "   |   R  Recover" : "");
+                    ? "E  Exit and speak to buyer" : "WASD  Drive   |   SPACE  Handbrake   |   E  Exit"+(islandControls ? "   |   R  Recover" : "");
                 if (delivery.CanTalk) return delivery.CanDeliver ? "E  Sell car to buyer" : "Buyer: Park closer and stop the car";
                 if (NearbyGuest() != null) return ReservedCar == null && !delivery.HasDelivery ? "E  Speak to guest and take keys" : "Finish your current delivery first";
                 if (NearbyBus() != null) return "E  Take bus to hotel";

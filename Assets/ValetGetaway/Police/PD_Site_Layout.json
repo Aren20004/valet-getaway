@@ -1,0 +1,2397 @@
+{
+  "project": "Valet Game - police station set",
+  "units": "1 unit = 1 m",
+  "axes": "FBX exported from Blender with axis_forward=Z, axis_up=Y, FBX_SCALE_ALL, apply transform. Unity (x, y, z) = Blender (x, z, y). Vehicles/characters face Blender +Y = Unity +Z. Unity yaw (deg) = -Blender rot_z.",
+  "site_origin": {
+    "description": "Centre of the original placeholder cube footprint, at grade (cube bottom).",
+    "unity_world": [
+      458.0,
+      0.3,
+      -134.0
+    ],
+    "relative_to_building_pos": [
+      0.0,
+      -9.0,
+      0.0
+    ]
+  },
+  "building_pos_reference": [
+    458.0,
+    9.3,
+    -134.0
+  ],
+  "orientation": "Station entrance faces Unity -Z (road side). Parking lot on +X, SWAT yard + helipad on -X. If the road in your scene is on another side, rotate the PD_Site root about Y (around the site origin).",
+  "how_to_use": "Easiest: drop PD_Site_Full.fbx in, set its root position to site_origin.unity_world, rotation 0, scale 1. Or build it from the per-asset FBX files using \"placements\": position = unity_world (or local_to_building_pos added to the old cube position 458, 9.3, -134), rotation = (0, unity_yaw_deg, 0).",
+  "site_bounds_blender": {
+    "min": [
+      -67.12,
+      -26.0,
+      -0.01
+    ],
+    "max": [
+      70.86,
+      22.04,
+      18.0
+    ]
+  },
+  "site_bounds_unity_world": {
+    "min": [
+      390.879,
+      0.288,
+      -160.0
+    ],
+    "max": [
+      528.861,
+      18.3,
+      -111.963
+    ]
+  },
+  "footprint_m": {
+    "x": 137.98,
+    "z": 48.04
+  },
+  "extends_beyond_original_cube_m": {
+    "minus_x": 41.12,
+    "plus_x": 44.86,
+    "minus_z": 7.0,
+    "plus_z": 3.04
+  },
+  "assets": {
+    "PD_PoliceStation": {
+      "file": "PD_PoliceStation.fbx",
+      "category": "building",
+      "label": "Police station",
+      "tris": 11872,
+      "size_m": {
+        "x": 53.92,
+        "y_height": 18.0,
+        "z": 43.08
+      },
+      "pivot": "centre of 52 x 38 m footprint at grade; entrance faces -Y (Unity -Z)"
+    },
+    "PD_ParkingLot": {
+      "file": "PD_ParkingLot.fbx",
+      "category": "site",
+      "label": "Parking lot",
+      "tris": 2052,
+      "size_m": {
+        "x": 42.0,
+        "y_height": 0.18,
+        "z": 38.0
+      },
+      "pivot": "lot centre at grade (placed at site x=+47)"
+    },
+    "PD_SwatYard": {
+      "file": "PD_SwatYard.fbx",
+      "category": "site",
+      "label": "SWAT / impound yard",
+      "tris": 2756,
+      "size_m": {
+        "x": 38.05,
+        "y_height": 2.96,
+        "z": 20.16
+      },
+      "pivot": "yard centre at grade; child _Gate slides along local X"
+    },
+    "PD_Helipad": {
+      "file": "PD_Helipad.fbx",
+      "category": "site",
+      "label": "Ground helipad",
+      "tris": 652,
+      "size_m": {
+        "x": 18.5,
+        "y_height": 4.75,
+        "z": 16.0
+      },
+      "pivot": "pad centre at grade"
+    },
+    "PD_SiteGround": {
+      "file": "PD_SiteGround.fbx",
+      "category": "site",
+      "label": "Plaza, sidewalks, driveways, lawns",
+      "tris": 348,
+      "size_m": {
+        "x": 136.0,
+        "y_height": 0.17,
+        "z": 47.0
+      },
+      "pivot": "site origin (same as station)"
+    },
+    "PD_PatrolSedan": {
+      "file": "PD_PatrolSedan.fbx",
+      "category": "vehicle",
+      "label": "Patrol sedan",
+      "tris": 2628,
+      "size_m": {
+        "x": 2.14,
+        "y_height": 1.64,
+        "z": 5.19
+      },
+      "pivot": "ground centre, faces +Y (Blender) = +Z (Unity)"
+    },
+    "PD_UnmarkedSedan": {
+      "file": "PD_UnmarkedSedan.fbx",
+      "category": "vehicle",
+      "label": "Unmarked detective sedan",
+      "tris": 1608,
+      "size_m": {
+        "x": 2.14,
+        "y_height": 1.47,
+        "z": 5.19
+      },
+      "pivot": "ground centre, faces +Y (Blender) = +Z (Unity)"
+    },
+    "PD_PoliceSUV": {
+      "file": "PD_PoliceSUV.fbx",
+      "category": "vehicle",
+      "label": "Police SUV",
+      "tris": 2796,
+      "size_m": {
+        "x": 2.28,
+        "y_height": 2.01,
+        "z": 5.33
+      },
+      "pivot": "ground centre, faces +Y (Blender) = +Z (Unity)"
+    },
+    "PD_SWAT_ArmoredTruck": {
+      "file": "PD_SWAT_ArmoredTruck.fbx",
+      "category": "vehicle",
+      "label": "SWAT armored truck",
+      "tris": 3780,
+      "size_m": {
+        "x": 2.96,
+        "y_height": 3.07,
+        "z": 7.21
+      },
+      "pivot": "ground centre, faces +Y (Blender) = +Z (Unity)"
+    },
+    "PD_SWAT_Van": {
+      "file": "PD_SWAT_Van.fbx",
+      "category": "vehicle",
+      "label": "SWAT van",
+      "tris": 3448,
+      "size_m": {
+        "x": 2.66,
+        "y_height": 3.34,
+        "z": 6.93
+      },
+      "pivot": "ground centre, faces +Y (Blender) = +Z (Unity)"
+    },
+    "PD_PoliceHelicopter": {
+      "file": "PD_PoliceHelicopter.fbx",
+      "category": "vehicle",
+      "label": "Police helicopter",
+      "tris": 2716,
+      "size_m": {
+        "x": 7.82,
+        "y_height": 3.48,
+        "z": 12.1
+      },
+      "pivot": "ground under rotor mast; _MainRotor spins on local Z, _TailRotor on local X"
+    },
+    "PD_PoliceOfficer": {
+      "file": "PD_PoliceOfficer.fbx",
+      "category": "character",
+      "label": "Police officer",
+      "tris": 1404,
+      "size_m": {
+        "x": 1.43,
+        "y_height": 1.91,
+        "z": 0.33
+      },
+      "pivot": "between feet, A-pose, faces +Y"
+    },
+    "PD_SWAT_Officer": {
+      "file": "PD_SWAT_Officer.fbx",
+      "category": "character",
+      "label": "SWAT officer",
+      "tris": 2606,
+      "size_m": {
+        "x": 1.49,
+        "y_height": 1.86,
+        "z": 0.46
+      },
+      "pivot": "between feet, A-pose; _Rifle separate (pivot at grip)"
+    },
+    "PD_PoliceChief": {
+      "file": "PD_PoliceChief.fbx",
+      "category": "character",
+      "label": "Police chief / desk sergeant",
+      "tris": 1464,
+      "size_m": {
+        "x": 1.43,
+        "y_height": 1.89,
+        "z": 0.34
+      },
+      "pivot": "between feet, A-pose, faces +Y"
+    },
+    "PD_TrafficCone": {
+      "file": "PD_TrafficCone.fbx",
+      "category": "prop",
+      "label": "Traffic cone",
+      "tris": 176,
+      "size_m": {
+        "x": 0.38,
+        "y_height": 0.72,
+        "z": 0.38
+      },
+      "pivot": "ground centre"
+    },
+    "PD_Barricade": {
+      "file": "PD_Barricade.fbx",
+      "category": "prop",
+      "label": "Striped barricade",
+      "tris": 368,
+      "size_m": {
+        "x": 2.0,
+        "y_height": 1.18,
+        "z": 0.7
+      },
+      "pivot": "ground centre"
+    },
+    "PD_Sawhorse": {
+      "file": "PD_Sawhorse.fbx",
+      "category": "prop",
+      "label": "Police sawhorse",
+      "tris": 948,
+      "size_m": {
+        "x": 1.9,
+        "y_height": 1.13,
+        "z": 0.76
+      },
+      "pivot": "ground centre"
+    },
+    "PD_TapeStand": {
+      "file": "PD_TapeStand.fbx",
+      "category": "prop",
+      "label": "Police tape stand",
+      "tris": 2620,
+      "size_m": {
+        "x": 2.74,
+        "y_height": 1.02,
+        "z": 0.34
+      },
+      "pivot": "ground centre"
+    },
+    "PD_Bench": {
+      "file": "PD_Bench.fbx",
+      "category": "prop",
+      "label": "Bench",
+      "tris": 376,
+      "size_m": {
+        "x": 1.8,
+        "y_height": 0.91,
+        "z": 0.58
+      },
+      "pivot": "ground centre"
+    },
+    "PD_BikeRack": {
+      "file": "PD_BikeRack.fbx",
+      "category": "prop",
+      "label": "Bike rack",
+      "tris": 324,
+      "size_m": {
+        "x": 2.6,
+        "y_height": 0.75,
+        "z": 0.68
+      },
+      "pivot": "ground centre"
+    },
+    "PD_Dumpster": {
+      "file": "PD_Dumpster.fbx",
+      "category": "prop",
+      "label": "Dumpster",
+      "tris": 508,
+      "size_m": {
+        "x": 1.96,
+        "y_height": 1.43,
+        "z": 1.35
+      },
+      "pivot": "ground centre"
+    },
+    "PD_JerseyBarrier": {
+      "file": "PD_JerseyBarrier.fbx",
+      "category": "prop",
+      "label": "Jersey barrier",
+      "tris": 112,
+      "size_m": {
+        "x": 3.0,
+        "y_height": 0.82,
+        "z": 0.62
+      },
+      "pivot": "ground centre"
+    },
+    "PD_Bollard": {
+      "file": "PD_Bollard.fbx",
+      "category": "prop",
+      "label": "Bollard",
+      "tris": 102,
+      "size_m": {
+        "x": 0.25,
+        "y_height": 1.08,
+        "z": 0.27
+      },
+      "pivot": "ground centre"
+    },
+    "PD_GateArm": {
+      "file": "PD_GateArm.fbx",
+      "category": "prop",
+      "label": "Gate arm (_Arm pivots at hinge)",
+      "tris": 656,
+      "size_m": {
+        "x": 5.36,
+        "y_height": 1.34,
+        "z": 1.52
+      },
+      "pivot": "ground centre"
+    },
+    "PD_GuardBooth": {
+      "file": "PD_GuardBooth.fbx",
+      "category": "prop",
+      "label": "Guard booth",
+      "tris": 492,
+      "size_m": {
+        "x": 2.5,
+        "y_height": 2.51,
+        "z": 2.51
+      },
+      "pivot": "ground centre"
+    },
+    "PD_SWAT_Container": {
+      "file": "PD_SWAT_Container.fbx",
+      "category": "prop",
+      "label": "SWAT storage container",
+      "tris": 1548,
+      "size_m": {
+        "x": 6.13,
+        "y_height": 2.59,
+        "z": 2.53
+      },
+      "pivot": "ground centre"
+    },
+    "PD_MonumentSign": {
+      "file": "PD_MonumentSign.fbx",
+      "category": "prop",
+      "label": "Monument sign",
+      "tris": 2322,
+      "size_m": {
+        "x": 7.0,
+        "y_height": 1.93,
+        "z": 1.46
+      },
+      "pivot": "ground centre"
+    },
+    "PD_Planter": {
+      "file": "PD_Planter.fbx",
+      "category": "prop",
+      "label": "Planter",
+      "tris": 116,
+      "size_m": {
+        "x": 3.0,
+        "y_height": 1.09,
+        "z": 1.1
+      },
+      "pivot": "ground centre"
+    },
+    "PD_LampPost": {
+      "file": "PD_LampPost.fbx",
+      "category": "prop",
+      "label": "Lot lamp post",
+      "tris": 200,
+      "size_m": {
+        "x": 3.45,
+        "y_height": 8.0,
+        "z": 0.5
+      },
+      "pivot": "ground centre"
+    },
+    "PD_Tree": {
+      "file": "PD_Tree.fbx",
+      "category": "prop",
+      "label": "Tree",
+      "tris": 80,
+      "size_m": {
+        "x": 4.07,
+        "y_height": 6.62,
+        "z": 3.32
+      },
+      "pivot": "ground centre"
+    },
+    "PD_TreeSmall": {
+      "file": "PD_TreeSmall.fbx",
+      "category": "prop",
+      "label": "Small tree",
+      "tris": 80,
+      "size_m": {
+        "x": 2.88,
+        "y_height": 4.68,
+        "z": 2.35
+      },
+      "pivot": "ground centre"
+    },
+    "PD_FlagPole_US": {
+      "file": "PD_FlagPole_US.fbx",
+      "category": "prop",
+      "label": "Flag pole (us)",
+      "tris": 316,
+      "size_m": {
+        "x": 2.6,
+        "y_height": 10.2,
+        "z": 0.24
+      },
+      "pivot": "pole base"
+    },
+    "PD_FlagPole_State": {
+      "file": "PD_FlagPole_State.fbx",
+      "category": "prop",
+      "label": "Flag pole (state)",
+      "tris": 132,
+      "size_m": {
+        "x": 2.6,
+        "y_height": 10.2,
+        "z": 0.24
+      },
+      "pivot": "pole base"
+    },
+    "PD_FlagPole_Police": {
+      "file": "PD_FlagPole_Police.fbx",
+      "category": "prop",
+      "label": "Flag pole (pd)",
+      "tris": 716,
+      "size_m": {
+        "x": 2.6,
+        "y_height": 10.2,
+        "z": 0.24
+      },
+      "pivot": "pole base"
+    }
+  },
+  "placements": [
+    {
+      "name": "PD_PoliceStation_01",
+      "asset": "PD_PoliceStation",
+      "file": "PD_PoliceStation.fbx",
+      "unity_world": [
+        458.0,
+        0.3,
+        -134.0
+      ],
+      "local_to_building_pos": [
+        0,
+        -9.0,
+        0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 0,
+        "y": 0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_SiteGround_01",
+      "asset": "PD_SiteGround",
+      "file": "PD_SiteGround.fbx",
+      "unity_world": [
+        458.0,
+        0.3,
+        -134.0
+      ],
+      "local_to_building_pos": [
+        0,
+        -9.0,
+        0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 0,
+        "y": 0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_ParkingLot_01",
+      "asset": "PD_ParkingLot",
+      "file": "PD_ParkingLot.fbx",
+      "unity_world": [
+        505.0,
+        0.3,
+        -134.0
+      ],
+      "local_to_building_pos": [
+        47.0,
+        -9.0,
+        0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 47.0,
+        "y": 0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_SwatYard_01",
+      "asset": "PD_SwatYard",
+      "file": "PD_SwatYard.fbx",
+      "unity_world": [
+        413.0,
+        0.3,
+        -125.0
+      ],
+      "local_to_building_pos": [
+        -45.0,
+        -9.0,
+        9.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": -45.0,
+        "y": 9.0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_Helipad_01",
+      "asset": "PD_Helipad",
+      "file": "PD_Helipad.fbx",
+      "unity_world": [
+        408.0,
+        0.3,
+        -146.0
+      ],
+      "local_to_building_pos": [
+        -50.0,
+        -9.0,
+        -12.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": -50.0,
+        "y": -12.0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_PoliceSUV_01",
+      "asset": "PD_PoliceSUV",
+      "file": "PD_PoliceSUV.fbx",
+      "unity_world": [
+        487.35,
+        0.3,
+        -117.8
+      ],
+      "local_to_building_pos": [
+        29.35,
+        -9.0,
+        16.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 29.35,
+        "y": 16.2,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_PatrolSedan_01",
+      "asset": "PD_PatrolSedan",
+      "file": "PD_PatrolSedan.fbx",
+      "unity_world": [
+        490.05,
+        0.3,
+        -117.8
+      ],
+      "local_to_building_pos": [
+        32.05,
+        -9.0,
+        16.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 32.05,
+        "y": 16.2,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_PatrolSedan_02",
+      "asset": "PD_PatrolSedan",
+      "file": "PD_PatrolSedan.fbx",
+      "unity_world": [
+        492.75,
+        0.3,
+        -117.8
+      ],
+      "local_to_building_pos": [
+        34.75,
+        -9.0,
+        16.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 34.75,
+        "y": 16.2,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_PatrolSedan_03",
+      "asset": "PD_PatrolSedan",
+      "file": "PD_PatrolSedan.fbx",
+      "unity_world": [
+        498.15,
+        0.3,
+        -117.8
+      ],
+      "local_to_building_pos": [
+        40.15,
+        -9.0,
+        16.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 40.15,
+        "y": 16.2,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_PoliceSUV_02",
+      "asset": "PD_PoliceSUV",
+      "file": "PD_PoliceSUV.fbx",
+      "unity_world": [
+        500.85,
+        0.3,
+        -117.8
+      ],
+      "local_to_building_pos": [
+        42.85,
+        -9.0,
+        16.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 42.85,
+        "y": 16.2,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_UnmarkedSedan_01",
+      "asset": "PD_UnmarkedSedan",
+      "file": "PD_UnmarkedSedan.fbx",
+      "unity_world": [
+        506.25,
+        0.3,
+        -117.8
+      ],
+      "local_to_building_pos": [
+        48.25,
+        -9.0,
+        16.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 48.25,
+        "y": 16.2,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_PatrolSedan_04",
+      "asset": "PD_PatrolSedan",
+      "file": "PD_PatrolSedan.fbx",
+      "unity_world": [
+        511.65,
+        0.3,
+        -117.8
+      ],
+      "local_to_building_pos": [
+        53.65,
+        -9.0,
+        16.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 53.650000000000006,
+        "y": 16.2,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_PatrolSedan_05",
+      "asset": "PD_PatrolSedan",
+      "file": "PD_PatrolSedan.fbx",
+      "unity_world": [
+        490.05,
+        0.3,
+        -130.2
+      ],
+      "local_to_building_pos": [
+        32.05,
+        -9.0,
+        3.8
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": 32.05,
+        "y": 3.8,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_PoliceSUV_03",
+      "asset": "PD_PoliceSUV",
+      "file": "PD_PoliceSUV.fbx",
+      "unity_world": [
+        495.45,
+        0.3,
+        -130.2
+      ],
+      "local_to_building_pos": [
+        37.45,
+        -9.0,
+        3.8
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": 37.45,
+        "y": 3.8,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_UnmarkedSedan_02",
+      "asset": "PD_UnmarkedSedan",
+      "file": "PD_UnmarkedSedan.fbx",
+      "unity_world": [
+        503.55,
+        0.3,
+        -130.2
+      ],
+      "local_to_building_pos": [
+        45.55,
+        -9.0,
+        3.8
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": 45.55,
+        "y": 3.8,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_PatrolSedan_06",
+      "asset": "PD_PatrolSedan",
+      "file": "PD_PatrolSedan.fbx",
+      "unity_world": [
+        492.75,
+        0.3,
+        -135.8
+      ],
+      "local_to_building_pos": [
+        34.75,
+        -9.0,
+        -1.8
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 34.75,
+        "y": -1.8,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_PatrolSedan_07",
+      "asset": "PD_PatrolSedan",
+      "file": "PD_PatrolSedan.fbx",
+      "unity_world": [
+        500.85,
+        0.3,
+        -135.8
+      ],
+      "local_to_building_pos": [
+        42.85,
+        -9.0,
+        -1.8
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 42.85,
+        "y": -1.8,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_PoliceSUV_04",
+      "asset": "PD_PoliceSUV",
+      "file": "PD_PoliceSUV.fbx",
+      "unity_world": [
+        508.95,
+        0.3,
+        -135.8
+      ],
+      "local_to_building_pos": [
+        50.95,
+        -9.0,
+        -1.8
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 50.95,
+        "y": -1.8,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_PatrolSedan_08",
+      "asset": "PD_PatrolSedan",
+      "file": "PD_PatrolSedan.fbx",
+      "unity_world": [
+        495.45,
+        0.3,
+        -148.2
+      ],
+      "local_to_building_pos": [
+        37.45,
+        -9.0,
+        -14.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": 37.45,
+        "y": -14.2,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_PatrolSedan_09",
+      "asset": "PD_PatrolSedan",
+      "file": "PD_PatrolSedan.fbx",
+      "unity_world": [
+        498.15,
+        0.3,
+        -148.2
+      ],
+      "local_to_building_pos": [
+        40.15,
+        -9.0,
+        -14.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": 40.15,
+        "y": -14.2,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_PoliceSUV_05",
+      "asset": "PD_PoliceSUV",
+      "file": "PD_PoliceSUV.fbx",
+      "unity_world": [
+        506.25,
+        0.3,
+        -148.2
+      ],
+      "local_to_building_pos": [
+        48.25,
+        -9.0,
+        -14.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": 48.25,
+        "y": -14.2,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_LampPost_01",
+      "asset": "PD_LampPost",
+      "file": "PD_LampPost.fbx",
+      "unity_world": [
+        485.0,
+        0.3,
+        -142.0
+      ],
+      "local_to_building_pos": [
+        27.0,
+        -9.0,
+        -8.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        270,
+        0
+      ],
+      "blender": {
+        "x": 27.0,
+        "y": -8.0,
+        "rot_z": 90
+      }
+    },
+    {
+      "name": "PD_LampPost_02",
+      "asset": "PD_LampPost",
+      "file": "PD_LampPost.fbx",
+      "unity_world": [
+        485.0,
+        0.3,
+        -126.0
+      ],
+      "local_to_building_pos": [
+        27.0,
+        -9.0,
+        8.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        270,
+        0
+      ],
+      "blender": {
+        "x": 27.0,
+        "y": 8.0,
+        "rot_z": 90
+      }
+    },
+    {
+      "name": "PD_LampPost_03",
+      "asset": "PD_LampPost",
+      "file": "PD_LampPost.fbx",
+      "unity_world": [
+        525.4,
+        0.3,
+        -140.0
+      ],
+      "local_to_building_pos": [
+        67.4,
+        -9.0,
+        -6.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        270,
+        0
+      ],
+      "blender": {
+        "x": 67.4,
+        "y": -6.0,
+        "rot_z": 90
+      }
+    },
+    {
+      "name": "PD_LampPost_04",
+      "asset": "PD_LampPost",
+      "file": "PD_LampPost.fbx",
+      "unity_world": [
+        525.4,
+        0.3,
+        -125.0
+      ],
+      "local_to_building_pos": [
+        67.4,
+        -9.0,
+        9.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        270,
+        0
+      ],
+      "blender": {
+        "x": 67.4,
+        "y": 9.0,
+        "rot_z": 90
+      }
+    },
+    {
+      "name": "PD_GateArm_01",
+      "asset": "PD_GateArm",
+      "file": "PD_GateArm.fbx",
+      "unity_world": [
+        520.4,
+        0.3,
+        -152.6
+      ],
+      "local_to_building_pos": [
+        62.4,
+        -9.0,
+        -18.6
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": 62.4,
+        "y": -18.6,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_GuardBooth_01",
+      "asset": "PD_GuardBooth",
+      "file": "PD_GuardBooth.fbx",
+      "unity_world": [
+        521.5,
+        0.3,
+        -150.4
+      ],
+      "local_to_building_pos": [
+        63.5,
+        -9.0,
+        -16.4
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": 63.5,
+        "y": -16.4,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_Dumpster_01",
+      "asset": "PD_Dumpster",
+      "file": "PD_Dumpster.fbx",
+      "unity_world": [
+        524.6,
+        0.3,
+        -117.5
+      ],
+      "local_to_building_pos": [
+        66.6,
+        -9.0,
+        16.5
+      ],
+      "unity_rotation_euler": [
+        0,
+        270,
+        0
+      ],
+      "blender": {
+        "x": 66.6,
+        "y": 16.5,
+        "rot_z": 90
+      }
+    },
+    {
+      "name": "PD_TrafficCone_01",
+      "asset": "PD_TrafficCone",
+      "file": "PD_TrafficCone.fbx",
+      "unity_world": [
+        519.0,
+        0.3,
+        -122.0
+      ],
+      "local_to_building_pos": [
+        61.0,
+        -9.0,
+        12.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 61.0,
+        "y": 12.0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_TrafficCone_02",
+      "asset": "PD_TrafficCone",
+      "file": "PD_TrafficCone.fbx",
+      "unity_world": [
+        519.0,
+        0.3,
+        -120.5
+      ],
+      "local_to_building_pos": [
+        61.0,
+        -9.0,
+        13.5
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 61.0,
+        "y": 13.5,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_TrafficCone_03",
+      "asset": "PD_TrafficCone",
+      "file": "PD_TrafficCone.fbx",
+      "unity_world": [
+        519.0,
+        0.3,
+        -119.0
+      ],
+      "local_to_building_pos": [
+        61.0,
+        -9.0,
+        15.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 61.0,
+        "y": 15.0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_SWAT_ArmoredTruck_01",
+      "asset": "PD_SWAT_ArmoredTruck",
+      "file": "PD_SWAT_ArmoredTruck.fbx",
+      "unity_world": [
+        420.0,
+        0.3,
+        -124.0
+      ],
+      "local_to_building_pos": [
+        -38.0,
+        -9.0,
+        10.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": -38.0,
+        "y": 10.0,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_SWAT_Van_01",
+      "asset": "PD_SWAT_Van",
+      "file": "PD_SWAT_Van.fbx",
+      "unity_world": [
+        411.0,
+        0.3,
+        -124.0
+      ],
+      "local_to_building_pos": [
+        -47.0,
+        -9.0,
+        10.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": -47.0,
+        "y": 10.0,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_SWAT_Container_01",
+      "asset": "PD_SWAT_Container",
+      "file": "PD_SWAT_Container.fbx",
+      "unity_world": [
+        400.0,
+        0.3,
+        -121.0
+      ],
+      "local_to_building_pos": [
+        -58.0,
+        -9.0,
+        13.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        270,
+        0
+      ],
+      "blender": {
+        "x": -58.0,
+        "y": 13.0,
+        "rot_z": 90
+      }
+    },
+    {
+      "name": "PD_JerseyBarrier_01",
+      "asset": "PD_JerseyBarrier",
+      "file": "PD_JerseyBarrier.fbx",
+      "unity_world": [
+        399.5,
+        0.3,
+        -130.5
+      ],
+      "local_to_building_pos": [
+        -58.5,
+        -9.0,
+        3.5
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -58.5,
+        "y": 3.5,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_JerseyBarrier_02",
+      "asset": "PD_JerseyBarrier",
+      "file": "PD_JerseyBarrier.fbx",
+      "unity_world": [
+        403.0,
+        0.3,
+        -130.5
+      ],
+      "local_to_building_pos": [
+        -55.0,
+        -9.0,
+        3.5
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -55.0,
+        "y": 3.5,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_Barricade_01",
+      "asset": "PD_Barricade",
+      "file": "PD_Barricade.fbx",
+      "unity_world": [
+        405.5,
+        0.3,
+        -117.4
+      ],
+      "local_to_building_pos": [
+        -52.5,
+        -9.0,
+        16.6
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -52.5,
+        "y": 16.6,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_Barricade_02",
+      "asset": "PD_Barricade",
+      "file": "PD_Barricade.fbx",
+      "unity_world": [
+        405.5,
+        0.3,
+        -116.4
+      ],
+      "local_to_building_pos": [
+        -52.5,
+        -9.0,
+        17.6
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -52.5,
+        "y": 17.6,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_Sawhorse_01",
+      "asset": "PD_Sawhorse",
+      "file": "PD_Sawhorse.fbx",
+      "unity_world": [
+        405.5,
+        0.3,
+        -119.0
+      ],
+      "local_to_building_pos": [
+        -52.5,
+        -9.0,
+        15.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -52.5,
+        "y": 15.0,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_LampPost_05",
+      "asset": "PD_LampPost",
+      "file": "PD_LampPost.fbx",
+      "unity_world": [
+        395.5,
+        0.3,
+        -116.5
+      ],
+      "local_to_building_pos": [
+        -62.5,
+        -9.0,
+        17.5
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -62.5,
+        "y": 17.5,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_TrafficCone_04",
+      "asset": "PD_TrafficCone",
+      "file": "PD_TrafficCone.fbx",
+      "unity_world": [
+        427.4,
+        0.3,
+        -137.0
+      ],
+      "local_to_building_pos": [
+        -30.6,
+        -9.0,
+        -3.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": -30.6,
+        "y": -3.0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_TrafficCone_05",
+      "asset": "PD_TrafficCone",
+      "file": "PD_TrafficCone.fbx",
+      "unity_world": [
+        424.6,
+        0.3,
+        -137.0
+      ],
+      "local_to_building_pos": [
+        -33.4,
+        -9.0,
+        -3.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": -33.4,
+        "y": -3.0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_SWAT_Officer_01",
+      "asset": "PD_SWAT_Officer",
+      "file": "PD_SWAT_Officer.fbx",
+      "unity_world": [
+        422.6,
+        0.3,
+        -127.8
+      ],
+      "local_to_building_pos": [
+        -35.4,
+        -9.0,
+        6.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        145,
+        0
+      ],
+      "blender": {
+        "x": -35.4,
+        "y": 6.2,
+        "rot_z": 215
+      }
+    },
+    {
+      "name": "PD_SWAT_Officer_02",
+      "asset": "PD_SWAT_Officer",
+      "file": "PD_SWAT_Officer.fbx",
+      "unity_world": [
+        417.2,
+        0.3,
+        -129.8
+      ],
+      "local_to_building_pos": [
+        -40.8,
+        -9.0,
+        4.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        200,
+        0
+      ],
+      "blender": {
+        "x": -40.8,
+        "y": 4.2,
+        "rot_z": 160
+      }
+    },
+    {
+      "name": "PD_PoliceHelicopter_01",
+      "asset": "PD_PoliceHelicopter",
+      "file": "PD_PoliceHelicopter.fbx",
+      "unity_world": [
+        408.0,
+        0.3,
+        -146.0
+      ],
+      "local_to_building_pos": [
+        -50.0,
+        -9.0,
+        -12.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        335,
+        0
+      ],
+      "blender": {
+        "x": -50.0,
+        "y": -12.0,
+        "rot_z": 25
+      }
+    },
+    {
+      "name": "PD_FlagPole_US_01",
+      "asset": "PD_FlagPole_US",
+      "file": "PD_FlagPole_US.fbx",
+      "unity_world": [
+        443.0,
+        0.3,
+        -155.4
+      ],
+      "local_to_building_pos": [
+        -15.0,
+        -9.0,
+        -21.4
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -15.0,
+        "y": -21.4,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_FlagPole_State_01",
+      "asset": "PD_FlagPole_State",
+      "file": "PD_FlagPole_State.fbx",
+      "unity_world": [
+        446.0,
+        0.3,
+        -155.4
+      ],
+      "local_to_building_pos": [
+        -12.0,
+        -9.0,
+        -21.4
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -12.0,
+        "y": -21.4,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_FlagPole_Police_01",
+      "asset": "PD_FlagPole_Police",
+      "file": "PD_FlagPole_Police.fbx",
+      "unity_world": [
+        449.0,
+        0.3,
+        -155.4
+      ],
+      "local_to_building_pos": [
+        -9.0,
+        -9.0,
+        -21.4
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -9.0,
+        "y": -21.4,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_Bollard_01",
+      "asset": "PD_Bollard",
+      "file": "PD_Bollard.fbx",
+      "unity_world": [
+        453.5,
+        0.3,
+        -156.75
+      ],
+      "local_to_building_pos": [
+        -4.5,
+        -9.0,
+        -22.75
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": -4.5,
+        "y": -22.75,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_Bollard_02",
+      "asset": "PD_Bollard",
+      "file": "PD_Bollard.fbx",
+      "unity_world": [
+        455.3,
+        0.3,
+        -156.75
+      ],
+      "local_to_building_pos": [
+        -2.7,
+        -9.0,
+        -22.75
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": -2.7,
+        "y": -22.75,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_Bollard_03",
+      "asset": "PD_Bollard",
+      "file": "PD_Bollard.fbx",
+      "unity_world": [
+        457.1,
+        0.3,
+        -156.75
+      ],
+      "local_to_building_pos": [
+        -0.9,
+        -9.0,
+        -22.75
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": -0.9,
+        "y": -22.75,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_Bollard_04",
+      "asset": "PD_Bollard",
+      "file": "PD_Bollard.fbx",
+      "unity_world": [
+        458.9,
+        0.3,
+        -156.75
+      ],
+      "local_to_building_pos": [
+        0.9,
+        -9.0,
+        -22.75
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 0.9,
+        "y": -22.75,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_Bollard_05",
+      "asset": "PD_Bollard",
+      "file": "PD_Bollard.fbx",
+      "unity_world": [
+        460.7,
+        0.3,
+        -156.75
+      ],
+      "local_to_building_pos": [
+        2.7,
+        -9.0,
+        -22.75
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 2.7,
+        "y": -22.75,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_Bollard_06",
+      "asset": "PD_Bollard",
+      "file": "PD_Bollard.fbx",
+      "unity_world": [
+        462.5,
+        0.3,
+        -156.75
+      ],
+      "local_to_building_pos": [
+        4.5,
+        -9.0,
+        -22.75
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 4.5,
+        "y": -22.75,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_Planter_01",
+      "asset": "PD_Planter",
+      "file": "PD_Planter.fbx",
+      "unity_world": [
+        440.0,
+        0.3,
+        -155.2
+      ],
+      "local_to_building_pos": [
+        -18.0,
+        -9.0,
+        -21.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": -18.0,
+        "y": -21.2,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_Planter_02",
+      "asset": "PD_Planter",
+      "file": "PD_Planter.fbx",
+      "unity_world": [
+        476.5,
+        0.3,
+        -155.2
+      ],
+      "local_to_building_pos": [
+        18.5,
+        -9.0,
+        -21.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 18.5,
+        "y": -21.2,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_Bench_01",
+      "asset": "PD_Bench",
+      "file": "PD_Bench.fbx",
+      "unity_world": [
+        435.4,
+        0.3,
+        -155.5
+      ],
+      "local_to_building_pos": [
+        -22.6,
+        -9.0,
+        -21.5
+      ],
+      "unity_rotation_euler": [
+        0,
+        180,
+        0
+      ],
+      "blender": {
+        "x": -22.6,
+        "y": -21.5,
+        "rot_z": 180
+      }
+    },
+    {
+      "name": "PD_BikeRack_01",
+      "asset": "PD_BikeRack",
+      "file": "PD_BikeRack.fbx",
+      "unity_world": [
+        481.0,
+        0.3,
+        -155.4
+      ],
+      "local_to_building_pos": [
+        23.0,
+        -9.0,
+        -21.4
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 23.0,
+        "y": -21.4,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_MonumentSign_01",
+      "asset": "PD_MonumentSign",
+      "file": "PD_MonumentSign.fbx",
+      "unity_world": [
+        500.0,
+        0.3,
+        -155.0
+      ],
+      "local_to_building_pos": [
+        42.0,
+        -9.0,
+        -21.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        0.0,
+        0
+      ],
+      "blender": {
+        "x": 42.0,
+        "y": -21.0,
+        "rot_z": 0.0
+      }
+    },
+    {
+      "name": "PD_PoliceOfficer_01",
+      "asset": "PD_PoliceOfficer",
+      "file": "PD_PoliceOfficer.fbx",
+      "unity_world": [
+        460.4,
+        0.3,
+        -156.2
+      ],
+      "local_to_building_pos": [
+        2.4,
+        -9.0,
+        -22.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        165,
+        0
+      ],
+      "blender": {
+        "x": 2.4,
+        "y": -22.2,
+        "rot_z": 195
+      }
+    },
+    {
+      "name": "PD_PoliceChief_01",
+      "asset": "PD_PoliceChief",
+      "file": "PD_PoliceChief.fbx",
+      "unity_world": [
+        456.4,
+        0.3,
+        -156.0
+      ],
+      "local_to_building_pos": [
+        -1.6,
+        -9.0,
+        -22.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        190,
+        0
+      ],
+      "blender": {
+        "x": -1.6,
+        "y": -22.0,
+        "rot_z": 170
+      }
+    },
+    {
+      "name": "PD_PoliceOfficer_02",
+      "asset": "PD_PoliceOfficer",
+      "file": "PD_PoliceOfficer.fbx",
+      "unity_world": [
+        493.5,
+        0.3,
+        -143.0
+      ],
+      "local_to_building_pos": [
+        35.5,
+        -9.0,
+        -9.0
+      ],
+      "unity_rotation_euler": [
+        0,
+        130,
+        0
+      ],
+      "blender": {
+        "x": 35.5,
+        "y": -9.0,
+        "rot_z": 230
+      }
+    },
+    {
+      "name": "PD_TapeStand_01",
+      "asset": "PD_TapeStand",
+      "file": "PD_TapeStand.fbx",
+      "unity_world": [
+        434.0,
+        0.3,
+        -158.5
+      ],
+      "local_to_building_pos": [
+        -24.0,
+        -9.0,
+        -24.5
+      ],
+      "unity_rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "blender": {
+        "x": -24.0,
+        "y": -24.5,
+        "rot_z": 0
+      }
+    },
+    {
+      "name": "PD_Tree_01",
+      "asset": "PD_Tree",
+      "file": "PD_Tree.fbx",
+      "unity_world": [
+        489.0,
+        0.3,
+        -155.1
+      ],
+      "local_to_building_pos": [
+        31,
+        -9.0,
+        -21.1
+      ],
+      "unity_rotation_euler": [
+        0,
+        293,
+        0
+      ],
+      "blender": {
+        "x": 31,
+        "y": -21.1,
+        "rot_z": 67
+      }
+    },
+    {
+      "name": "PD_Tree_02",
+      "asset": "PD_Tree",
+      "file": "PD_Tree.fbx",
+      "unity_world": [
+        510.5,
+        0.3,
+        -155.1
+      ],
+      "local_to_building_pos": [
+        52.5,
+        -9.0,
+        -21.1
+      ],
+      "unity_rotation_euler": [
+        0,
+        217.5,
+        0
+      ],
+      "blender": {
+        "x": 52.5,
+        "y": -21.1,
+        "rot_z": 142.5
+      }
+    },
+    {
+      "name": "PD_Tree_03",
+      "asset": "PD_Tree",
+      "file": "PD_Tree.fbx",
+      "unity_world": [
+        393.5,
+        0.3,
+        -155.0
+      ],
+      "local_to_building_pos": [
+        -64.5,
+        -9.0,
+        -21
+      ],
+      "unity_rotation_euler": [
+        0,
+        226.5,
+        0
+      ],
+      "blender": {
+        "x": -64.5,
+        "y": -21,
+        "rot_z": 133.5
+      }
+    },
+    {
+      "name": "PD_TreeSmall_01",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        396.0,
+        0.3,
+        -137.5
+      ],
+      "local_to_building_pos": [
+        -62,
+        -9.0,
+        -3.5
+      ],
+      "unity_rotation_euler": [
+        0,
+        134,
+        0
+      ],
+      "blender": {
+        "x": -62,
+        "y": -3.5,
+        "rot_z": 226
+      }
+    },
+    {
+      "name": "PD_TreeSmall_02",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        431.0,
+        0.3,
+        -154.5
+      ],
+      "local_to_building_pos": [
+        -27.0,
+        -9.0,
+        -20.5
+      ],
+      "unity_rotation_euler": [
+        0,
+        279.0,
+        0
+      ],
+      "blender": {
+        "x": -27.0,
+        "y": -20.5,
+        "rot_z": 81.0
+      }
+    },
+    {
+      "name": "PD_TreeSmall_03",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        431.0,
+        0.3,
+        -144.0
+      ],
+      "local_to_building_pos": [
+        -27.0,
+        -9.0,
+        -10
+      ],
+      "unity_rotation_euler": [
+        0,
+        279.0,
+        0
+      ],
+      "blender": {
+        "x": -27.0,
+        "y": -10,
+        "rot_z": 81.0
+      }
+    },
+    {
+      "name": "PD_TreeSmall_04",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        418.0,
+        0.3,
+        -113.8
+      ],
+      "local_to_building_pos": [
+        -40,
+        -9.0,
+        20.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        40,
+        0
+      ],
+      "blender": {
+        "x": -40,
+        "y": 20.2,
+        "rot_z": 320
+      }
+    },
+    {
+      "name": "PD_TreeSmall_05",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        448.0,
+        0.3,
+        -113.8
+      ],
+      "local_to_building_pos": [
+        -10,
+        -9.0,
+        20.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        10,
+        0
+      ],
+      "blender": {
+        "x": -10,
+        "y": 20.2,
+        "rot_z": 350
+      }
+    },
+    {
+      "name": "PD_TreeSmall_06",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        468.0,
+        0.3,
+        -113.8
+      ],
+      "local_to_building_pos": [
+        10,
+        -9.0,
+        20.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        350,
+        0
+      ],
+      "blender": {
+        "x": 10,
+        "y": 20.2,
+        "rot_z": 10
+      }
+    },
+    {
+      "name": "PD_TreeSmall_07",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        488.0,
+        0.3,
+        -113.8
+      ],
+      "local_to_building_pos": [
+        30,
+        -9.0,
+        20.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        330,
+        0
+      ],
+      "blender": {
+        "x": 30,
+        "y": 20.2,
+        "rot_z": 30
+      }
+    },
+    {
+      "name": "PD_TreeSmall_08",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        513.0,
+        0.3,
+        -113.8
+      ],
+      "local_to_building_pos": [
+        55,
+        -9.0,
+        20.2
+      ],
+      "unity_rotation_euler": [
+        0,
+        125,
+        0
+      ],
+      "blender": {
+        "x": 55,
+        "y": 20.2,
+        "rot_z": 235
+      }
+    },
+    {
+      "name": "PD_TreeSmall_09",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        527.0,
+        0.3,
+        -154.0
+      ],
+      "local_to_building_pos": [
+        69,
+        -9.0,
+        -20
+      ],
+      "unity_rotation_euler": [
+        0,
+        327,
+        0
+      ],
+      "blender": {
+        "x": 69,
+        "y": -20,
+        "rot_z": 33
+      }
+    },
+    {
+      "name": "PD_TreeSmall_10",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        527.0,
+        0.3,
+        -134.0
+      ],
+      "local_to_building_pos": [
+        69,
+        -9.0,
+        0
+      ],
+      "unity_rotation_euler": [
+        0,
+        327,
+        0
+      ],
+      "blender": {
+        "x": 69,
+        "y": 0,
+        "rot_z": 33
+      }
+    },
+    {
+      "name": "PD_TreeSmall_11",
+      "asset": "PD_TreeSmall",
+      "file": "PD_TreeSmall.fbx",
+      "unity_world": [
+        393.0,
+        0.3,
+        -126.0
+      ],
+      "local_to_building_pos": [
+        -65,
+        -9.0,
+        8
+      ],
+      "unity_rotation_euler": [
+        0,
+        245,
+        0
+      ],
+      "blender": {
+        "x": -65,
+        "y": 8,
+        "rot_z": 115
+      }
+    }
+  ],
+  "site_total_tris": 93718
+}

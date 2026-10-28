@@ -20,7 +20,7 @@ namespace ValetGetaway
 
         private void Update()
         {
-            if (player == null)
+            if (player == null || agent == null || !agent.enabled || !agent.isOnNavMesh)
                 return;
 
             // Stop chasing when the player is driving

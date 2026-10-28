@@ -22,6 +22,12 @@ namespace ValetGetaway.Editor
         {
             public Vector2[] Points;
             public Rect Bounds;
+            public Quad(Vector2 a,Vector2 b,Vector2 c)
+            {
+                Points=new[] { a,b,c };
+                if(Cross(b-a,c-a)<0) System.Array.Reverse(Points);
+                Bounds=BoundsOf(Points);
+            }
             public Quad(Vector2 a, Vector2 b, Vector2 na, Vector2 nb, float halfWidth)
             {
                 Points = new[] { a-na*halfWidth, b-nb*halfWidth, b+nb*halfWidth, a+na*halfWidth };
@@ -72,11 +78,11 @@ namespace ValetGetaway.Editor
         {
             if(!quad.Bounds.Overlaps(BoundsOf(polygon))) { output.Add(polygon); return; }
             var remainder=polygon;
-            for(int edge=0;edge<4 && remainder.Count>=3;edge++)
+            for(int edge=0;edge<quad.Points.Length && remainder.Count>=3;edge++)
             {
-                var outside=HalfPlane(remainder,quad.Points[edge],quad.Points[(edge+1)%4],false);
+                var outside=HalfPlane(remainder,quad.Points[edge],quad.Points[(edge+1)%quad.Points.Length],false);
                 if(outside.Count>=3) output.Add(outside);
-                remainder=HalfPlane(remainder,quad.Points[edge],quad.Points[(edge+1)%4],true);
+                remainder=HalfPlane(remainder,quad.Points[edge],quad.Points[(edge+1)%quad.Points.Length],true);
             }
         }
         public static void Trim(IList<Surface> surfaces)
@@ -111,8 +117,8 @@ namespace ValetGetaway.Editor
                     }
                     // A closed loop can intersect itself at its entrance. Treat its
                     // other segments with the same ownership rules as separate roads.
-                    int segment=surface.TriangleSegments[t/3];
-                    for(int other=0;other<surface.Asphalt.Count && fragments.Count>0;other++)
+                    int segment=surface.TriangleSegments == null ? -1 : surface.TriangleSegments[t/3];
+                    for(int other=0;segment>=0 && other<surface.Asphalt.Count && fragments.Count>0;other++)
                     {
                         if(other==segment || (!surface.CurbTriangles[t/3] && other>segment)) continue;
                         var quad=surface.CurbTriangles[t/3] && other<segment ? surface.Full[other] : surface.Asphalt[other];
